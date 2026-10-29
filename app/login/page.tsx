@@ -20,12 +20,12 @@ export default async function LoginPage({ searchParams }: Props) {
           <input name="pin" placeholder={signup ? "Pick a PIN (6+ digits)" : "PIN"} autoComplete={signup ? "new-password" : "current-password"} {...pinProps} />
           {signup && <input name="pin2" placeholder="PIN again" autoComplete="new-password" {...pinProps} />}
           <button className="btn w-full">{signup ? "Create account" : "Sign in"}</button>
-          {signup && <p className="muted text-sm">A manager approves new accounts before you can clock in.</p>}
+          {signup && <p className="muted text-sm">One-time setup for the manager. Everyone else is added by the manager.</p>}
         </form>
       </div>
       <p className="muted mt-4 flex justify-between text-sm">
-        {signup ? <Link href="/login">Have an account? Sign in</Link> : <Link href="/login?mode=signup">New here? Create an account</Link>}
-        {!signup && <span>Forgot PIN? Ask your manager.</span>}
+        {signup ? <Link href="/login">Back to sign in</Link> : <span>New or forgot your PIN? Ask your manager.</span>}
+        {!signup && <Link href="/login?mode=signup" className="text-xs">Manager setup</Link>}
       </p>
     </div>
   );

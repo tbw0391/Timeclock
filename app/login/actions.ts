@@ -33,7 +33,11 @@ export async function signUp(form: FormData) {
   });
   if (error) {
     const taken = /already registered/i.test(error.message);
-    back("/login?mode=signup", { error: taken ? "That phone number already has an account. Sign in instead." : error.message });
+    back("/login?mode=signup", {
+      error: taken ? "That phone number already has an account. Sign in instead."
+        : /database error/i.test(error.message) ? "Only the manager sets up here. Ask your manager to add you."
+        : error.message,
+    });
   }
   if (!data.session) back("/login", { error: "Account created but sign-in is blocked. Ask the manager to check the Supabase email settings." });
   redirect("/");

@@ -2,7 +2,7 @@ import { Flash, Header } from "@/components/ui";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import { formatPhone } from "@/lib/phone";
 import { hours, timeLabel } from "@/lib/time";
-import { resetPin, saveEmployee, saveSettings } from "./actions";
+import { createEmployee, resetPin, saveEmployee, saveSettings } from "./actions";
 
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
@@ -48,16 +48,22 @@ export default async function AdminPage({ searchParams }: Props) {
 
       {pending.length > 0 && (
         <p className="mb-4 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
-          {pending.length} account{pending.length > 1 ? "s" : ""} waiting for approval or deactivated. Check
-          {" "}&ldquo;Active&rdquo; and save to let someone clock in.
+          {pending.length} deactivated account{pending.length > 1 ? "s" : ""}. Check &ldquo;Active&rdquo; and save
+          to let someone clock in again.
         </p>
       )}
 
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-1 font-semibold">Crew</h2>
         <p className="muted mb-3 text-sm">
-          New people sign up on the login page with their phone number and a PIN, then show up here for you to approve. If someone forgets their PIN, set a new one for them here.
+          Add people here with their phone number and a starting PIN, then give them the PIN. If someone forgets their PIN, set a new one for them here.
         </p>
+        <form action={createEmployee} className="mb-4 flex flex-wrap items-center gap-2">
+          <input name="full_name" placeholder="Name" className="input w-44!" required />
+          <input name="phone" type="tel" inputMode="tel" placeholder="Phone number" className="input w-40!" required />
+          <input name="pin" type="text" inputMode="numeric" pattern="\d{6,}" minLength={6} placeholder="Starting PIN (6+ digits)" className="input w-52!" required autoComplete="off" />
+          <button className="btn">Add employee</button>
+        </form>
         <table className="tbl">
           <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Active</th><th></th></tr></thead>
           <tbody>

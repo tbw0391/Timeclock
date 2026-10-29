@@ -9,13 +9,14 @@ No server to run.
   Auth needs an email per account, so each number logs in under a stand-in address
   (`<number>@phone.timeclock.app`) that never gets mail. Forgot your PIN? A manager
   resets it on the Crew page.
-- **Employees** sign up with their phone number, wait for a manager to approve them, then
+- **Employees** are added by a manager (name, phone, starting PIN), then
   tap Clock In / Clock Out on their phone. They see this week's and last week's hours.
 - **Managers** see who's on the clock, approve and deactivate people, fix or add
   missed punches (a reason is required and every change goes in the change log),
   view weekly totals with overtime, and download a payroll CSV.
-- **The manager is whoever signs up with `settings.manager_phone`** (set in the
-  database). If that's empty, the first person to sign up becomes the manager.
+- **The manager signs up once** under "Manager setup" on the login page with the
+  number in `settings.manager_phone` (set in the database). Nobody else can sign up;
+  the manager adds everyone from the Crew page.
 - Punch times come from the database clock, not the phone. Employees can't write to
   the tables directly; everything goes through the functions in
   `supabase/migrations/0001_init.sql`, and row-level security keeps each employee to

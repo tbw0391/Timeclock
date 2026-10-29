@@ -75,3 +75,17 @@ export async function resetPin(form: FormData) {
   if (error) back("/admin", { error: error.message });
   back("/admin", { ok: "PIN reset. Give the new PIN to them in person or by text." });
 }
+
+export async function createEmployee(form: FormData) {
+  const pin = text(form, "pin");
+  if (!isPin(pin)) back("/admin", { error: "PIN must be at least 6 digits" });
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_create_employee", {
+    p_name: text(form, "full_name"),
+    p_phone: text(form, "phone"),
+    p_pin: pin,
+  });
+  if (error) back("/admin", { error: error.message });
+  revalidatePath("/admin");
+  back("/admin", { ok: "Added. They sign in with their phone number and that PIN." });
+}
