@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Timeclock",
     start_url: "/",
     display: "standalone",
-    background_color: "#f6f7f9",
-    theme_color: "#1d4ed8",
+    background_color: "#fff8e7",
+    theme_color: "#7c3aed",
     icons: [
       { src: "/icon/192", sizes: "192x192", type: "image/png" },
       { src: "/icon/512", sizes: "512x512", type: "image/png" },

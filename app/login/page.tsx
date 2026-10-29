@@ -10,7 +10,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const phone = normalizePhone(sp.phone ?? "");
   return (
     <div className="mx-auto mt-10 max-w-sm">
-      <h1 className="mb-6 text-2xl font-semibold">Timeclock</h1>
+      <h1 className="rainbow mb-6 text-4xl font-bold">Timeclock</h1>
       <Flash error={sp.error} ok={sp.ok} />
       <div className="card">
         {phone ? (

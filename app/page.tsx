@@ -42,12 +42,12 @@ export default async function Home({ searchParams }: Props) {
             <>
               <p className="text-sm uppercase tracking-wide text-green-600">On the clock</p>
               <p className="mt-1 text-lg">since {timeLabel(open.clock_in, tz)}</p>
-              <ClockForm action={clockOut} label="Clock out" className="btn w-full bg-red-600! py-4 text-xl" />
+              <ClockForm action={clockOut} label="Clock out" className="btn btn-stop w-full py-4 text-2xl" />
             </>
           ) : (
             <>
               <p className="muted text-sm uppercase tracking-wide">Off the clock</p>
-              <ClockForm action={clockIn} label="Clock in" className="btn w-full bg-green-600! py-4 text-xl" />
+              <ClockForm action={clockIn} label="Clock in" className="btn btn-go w-full py-4 text-2xl" />
             </>
           )}
         </div>

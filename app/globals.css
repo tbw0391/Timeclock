@@ -1,33 +1,104 @@
 @import "tailwindcss";
 
+/* Crayon-box theme: cream paper with confetti dots, sticker cards with colored
+   drop shadows, chunky press-down buttons. Colors that carry white text are
+   dark enough to stay readable. */
 :root {
-  --bg: #f6f7f9;
+  --bg: #fff8e7;
+  --dots-1: #ffd6e8;
+  --dots-2: #cdeffd;
   --card: #ffffff;
-  --ink: #111827;
-  --muted: #6b7280;
-  --line: #e5e7eb;
-  --accent: #1d4ed8;
+  --ink: #2d1b4e;
+  --muted: #6b5b86;
+  --line: #2d1b4e;
+  --soft-line: #eadff7;
+  --accent: #7c3aed;
+  --accent-deep: #5b21b6;
+  --go: #16a34a;
+  --go-deep: #0f7a37;
+  --stop: #e11d48;
+  --stop-deep: #a3112f;
+  --pink: #ff6fb5;
+  --sky: #38bdf8;
+  --sun: #ffc93c;
+  --grass: #4ade80;
+  --tangerine: #fb923c;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b0f17;
-    --card: #131a26;
-    --ink: #e5e7eb;
-    --muted: #9ca3af;
-    --line: #253041;
-    --accent: #60a5fa;
+    --bg: #1b1640;
+    --dots-1: #2c2463;
+    --dots-2: #22305e;
+    --card: #2a2257;
+    --ink: #fdf6ff;
+    --muted: #c4b5fd;
+    --line: #8b7bd8;
+    --soft-line: #3d3378;
+    --accent: #a78bfa;
+    --accent-deep: #6d4fd6;
   }
 }
 
-body { background: var(--bg); color: var(--ink); }
+body {
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(var(--dots-1) 2.5px, transparent 3px),
+    radial-gradient(var(--dots-2) 2.5px, transparent 3px);
+  background-size: 44px 44px;
+  background-position: 0 0, 22px 22px;
+}
+
+a { color: var(--accent); }
 
 @layer components {
-  .card { @apply rounded-xl border p-4; background: var(--card); border-color: var(--line); }
+  .card {
+    @apply rounded-3xl border-[3px] p-5;
+    background: var(--card);
+    border-color: var(--line);
+    box-shadow: 6px 6px 0 var(--pink);
+  }
+  /* Each card on a page gets the next crayon. */
+  .card:nth-of-type(4n + 2) { box-shadow: 6px 6px 0 var(--sky); }
+  .card:nth-of-type(4n + 3) { box-shadow: 6px 6px 0 var(--sun); }
+  .card:nth-of-type(4n + 4) { box-shadow: 6px 6px 0 var(--grass); }
+
   .muted { color: var(--muted); }
-  .input { @apply w-full rounded-md border px-3 py-2 text-base; background: var(--bg); border-color: var(--line); }
-  .btn { @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium text-white; background: var(--accent); }
-  .btn-ghost { @apply inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-sm; border-color: var(--line); }
+  .input {
+    @apply w-full rounded-2xl border-2 px-3 py-2 text-base;
+    background: var(--bg);
+    border-color: var(--soft-line);
+  }
+  .input:focus { outline: 3px solid var(--sun); outline-offset: 1px; border-color: var(--line); }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2 font-semibold text-white transition-transform;
+    background: var(--accent);
+    box-shadow: 0 4px 0 var(--accent-deep);
+  }
+  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-deep); }
+  .btn:disabled { opacity: 0.7; }
+  .btn-go { background: var(--go); box-shadow: 0 5px 0 var(--go-deep); }
+  .btn-go:active:not(:disabled) { box-shadow: 0 1px 0 var(--go-deep); }
+  .btn-stop { background: var(--stop); box-shadow: 0 5px 0 var(--stop-deep); }
+  .btn-stop:active:not(:disabled) { box-shadow: 0 1px 0 var(--stop-deep); }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-full border-2 px-3 py-1.5 text-sm font-medium;
+    border-color: var(--line);
+    background: var(--card);
+  }
+  .btn-ghost:hover { background: var(--sun); color: #2d1b4e; }
+
+  .rainbow {
+    background: linear-gradient(90deg, var(--pink), var(--tangerine), var(--sun), var(--grass), var(--sky), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    width: fit-content; /* spread the whole rainbow across the word, not the row */
+  }
+
   .tbl { @apply w-full text-sm; }
-  .tbl th { @apply px-2 py-1.5 text-left font-medium; color: var(--muted); }
-  .tbl td { @apply border-t px-2 py-1.5 align-top; border-color: var(--line); }
+  .tbl th { @apply px-2 py-1.5 text-left font-semibold; color: var(--muted); }
+  .tbl td { @apply border-t-2 border-dashed px-2 py-1.5 align-top; border-color: var(--soft-line); }
 }
