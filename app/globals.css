@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --ink: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #1d4ed8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f17;
+    --card: #131a26;
+    --ink: #e5e7eb;
+    --muted: #9ca3af;
+    --line: #253041;
+    --accent: #60a5fa;
+  }
+}
+
+body { background: var(--bg); color: var(--ink); }
+
+@layer components {
+  .card { @apply rounded-xl border p-4; background: var(--card); border-color: var(--line); }
+  .muted { color: var(--muted); }
+  .input { @apply w-full rounded-md border px-3 py-2 text-base; background: var(--bg); border-color: var(--line); }
+  .btn { @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium text-white; background: var(--accent); }
+  .btn-ghost { @apply inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-sm; border-color: var(--line); }
+  .tbl { @apply w-full text-sm; }
+  .tbl th { @apply px-2 py-1.5 text-left font-medium; color: var(--muted); }
+  .tbl td { @apply border-t px-2 py-1.5 align-top; border-color: var(--line); }
+}
