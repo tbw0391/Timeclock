@@ -1,6 +1,7 @@
 import { Header } from "@/components/ui";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import { timeLabel } from "@/lib/time";
+import { displayName } from "@/lib/phone";
 
 type Edit = {
   id: number; punch_id: string; user_id: string; editor_id: string;
@@ -14,11 +15,11 @@ export default async function AuditPage() {
   const tz = settings.timezone;
   const [{ data: edits }, { data: people }] = await Promise.all([
     supabase.from("punch_edits").select("*").order("at", { ascending: false }).limit(200).returns<Edit[]>(),
-    supabase.from("profiles").select("id, full_name, email").returns<Profile[]>(),
+    supabase.from("profiles").select("id, full_name, phone").returns<Profile[]>(),
   ]);
   const name = (id: string) => {
     const p = people?.find((x) => x.id === id);
-    return p?.full_name || p?.email || "(removed)";
+    return p ? displayName(p) : "(removed)";
   };
   const span = (p: Punch | null) =>
     p ? `${timeLabel(p.clock_in, tz)} → ${p.clock_out ? timeLabel(p.clock_out, tz) : "open"}` : "–";

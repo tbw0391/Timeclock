@@ -23,6 +23,28 @@ export async function saveEmployee(form: FormData) {
   back("/admin", { ok: "Saved." });
 }
 
+export async function createEmployee(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_create_employee", {
+    p_name: text(form, "full_name"),
+    p_phone: text(form, "phone"),
+    p_pin: text(form, "pin"),
+  });
+  if (error) back("/admin", { error: error.message });
+  revalidatePath("/admin");
+  back("/admin", { ok: `Added ${text(form, "full_name")}. Give them their phone number and PIN to sign in.` });
+}
+
+export async function resetPin(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_reset_pin", {
+    p_user: text(form, "id"),
+    p_pin: text(form, "pin"),
+  });
+  if (error) back("/admin", { error: error.message });
+  back("/admin", { ok: "PIN reset." });
+}
+
 export async function savePunch(form: FormData) {
   const to = returnTo(form, "/admin/timesheets");
   const clockIn = text(form, "clock_in");

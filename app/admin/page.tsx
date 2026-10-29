@@ -1,7 +1,8 @@
 import { Flash, Header } from "@/components/ui";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import { hours, timeLabel } from "@/lib/time";
-import { saveEmployee, saveSettings } from "./actions";
+import { displayName, formatPhone } from "@/lib/phone";
+import { createEmployee, resetPin, saveEmployee, saveSettings } from "./actions";
 
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
@@ -34,7 +35,7 @@ export default async function AdminPage({ searchParams }: Props) {
             <tbody>
               {open.map((p) => (
                 <tr key={p.id}>
-                  <td>{byId.get(p.user_id)?.full_name || byId.get(p.user_id)?.email}</td>
+                  <td>{displayName(byId.get(p.user_id))}</td>
                   <td>{timeLabel(p.clock_in, tz)}</td>
                   <td>{hours((now - Date.parse(p.clock_in)) / 1000)}</td>
                   <td className="muted">{p.note}</td>
@@ -47,35 +48,48 @@ export default async function AdminPage({ searchParams }: Props) {
 
       {pending.length > 0 && (
         <p className="mb-4 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
-          {pending.length} account{pending.length > 1 ? "s" : ""} waiting for approval or deactivated. Check
-          {" "}&ldquo;Active&rdquo; and save to let someone clock in.
+          {pending.length} account{pending.length > 1 ? "s are" : " is"} deactivated. Check
+          {" "}&ldquo;Active&rdquo; and save to let someone clock in again.
         </p>
       )}
 
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-1 font-semibold">Crew</h2>
         <p className="muted mb-3 text-sm">
-          New people sign up on the login page with their own email, then show up here for you to approve.
+          People sign in with their phone number and PIN. Add them here; they can&apos;t sign up themselves.
         </p>
+        <form action={createEmployee} className="mb-4 flex flex-wrap items-center gap-2">
+          <input name="full_name" placeholder="Name" className="input w-44!" required />
+          <input name="phone" type="tel" placeholder="Phone number" className="input w-40!" required />
+          <input name="pin" inputMode="numeric" pattern="\d{6,}" title="At least 6 digits" placeholder="Starting PIN (6+ digits)" className="input w-52!" required autoComplete="off" />
+          <button className="btn">Add person</button>
+        </form>
         <table className="tbl">
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Active</th><th></th></tr></thead>
           <tbody>
             {(people ?? []).map((p) => (
               <tr key={p.id}>
                 <td colSpan={5} className="p-0!">
-                  <form action={saveEmployee} className="flex flex-wrap items-center gap-2 px-2 py-1.5">
-                    <input type="hidden" name="id" value={p.id} />
-                    <input name="full_name" defaultValue={p.full_name} className="input w-44!" aria-label="Name" />
-                    <span className="muted min-w-48 flex-1 text-sm">{p.email}</span>
-                    <select name="role" defaultValue={p.role} className="input w-32!" aria-label="Role">
-                      <option value="employee">Employee</option>
-                      <option value="admin">Manager</option>
-                    </select>
-                    <label className="flex items-center gap-1 text-sm">
-                      <input type="checkbox" name="active" defaultChecked={p.active} /> Active
-                    </label>
-                    <button className="btn-ghost">Save</button>
-                  </form>
+                  <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
+                    <form action={saveEmployee} className="flex flex-1 flex-wrap items-center gap-2">
+                      <input type="hidden" name="id" value={p.id} />
+                      <input name="full_name" defaultValue={p.full_name} className="input w-44!" aria-label="Name" />
+                      <span className="muted min-w-32 flex-1 text-sm">{formatPhone(p.phone)}</span>
+                      <select name="role" defaultValue={p.role} className="input w-32!" aria-label="Role">
+                        <option value="employee">Employee</option>
+                        <option value="admin">Manager</option>
+                      </select>
+                      <label className="flex items-center gap-1 text-sm">
+                        <input type="checkbox" name="active" defaultChecked={p.active} /> Active
+                      </label>
+                      <button className="btn-ghost">Save</button>
+                    </form>
+                    <form action={resetPin} className="flex items-center gap-2">
+                      <input type="hidden" name="id" value={p.id} />
+                      <input name="pin" inputMode="numeric" pattern="\d{6,}" title="At least 6 digits" placeholder="New PIN" className="input w-28!" required autoComplete="off" aria-label={`New PIN for ${displayName(p)}`} />
+                      <button className="btn-ghost">Reset PIN</button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             ))}

@@ -4,6 +4,7 @@ import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import {
   addDays, dayLabel, hours, isDate, localInput, timeLabel, todayIn, weekStart, weekTotals, type DayRow,
 } from "@/lib/time";
+import { displayName } from "@/lib/phone";
 import { deletePunch, savePunch } from "../actions";
 
 type Props = { searchParams: Promise<{ from?: string; to?: string; user?: string; error?: string; ok?: string }> };
@@ -35,7 +36,7 @@ export default async function TimesheetsPage({ searchParams }: Props) {
     return d >= from && d <= to;
   });
   const byId = new Map((people ?? []).map((p) => [p.id, p]));
-  const name = (id: string) => byId.get(id)?.full_name || byId.get(id)?.email || "?";
+  const name = (id: string) => displayName(byId.get(id));
   const weeks = weekTotals(((days ?? []) as DayRow[]).filter((d) => !user || d.user_id === user),
     settings.week_starts_on, settings.overtime_hours);
   const query = new URLSearchParams({ from, to, ...(user ? { user } : {}) });
@@ -52,7 +53,7 @@ export default async function TimesheetsPage({ searchParams }: Props) {
         <label className="text-sm">Who
           <select name="user" defaultValue={user} className="input mt-1">
             <option value="">Everyone</option>
-            {(people ?? []).map((p) => <option key={p.id} value={p.id}>{p.full_name || p.email}</option>)}
+            {(people ?? []).map((p) => <option key={p.id} value={p.id}>{displayName(p)}</option>)}
           </select>
         </label>
         <button className="btn">Show</button>
@@ -137,7 +138,7 @@ function PunchForm({ punch, people, tz, returnTo, defaultUser }: {
       ) : (
         <select name="user_id" defaultValue={defaultUser} className="input" required>
           <option value="">Who…</option>
-          {people?.map((p) => <option key={p.id} value={p.id}>{p.full_name || p.email}</option>)}
+          {people?.map((p) => <option key={p.id} value={p.id}>{displayName(p)}</option>)}
         </select>
       )}
       <label className="text-sm">In ({tz})
