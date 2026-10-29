@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { back, text } from "@/lib/flash";
+import { isPin } from "@/lib/phone";
 
 function returnTo(form: FormData, fallback: string) {
   const r = text(form, "return_to");
@@ -64,4 +65,13 @@ export async function saveSettings(form: FormData) {
   if (error) back("/admin", { error: error.message });
   revalidatePath("/", "layout");
   back("/admin", { ok: "Settings saved." });
+}
+
+export async function resetPin(form: FormData) {
+  const pin = text(form, "pin");
+  if (!isPin(pin)) back("/admin", { error: "PIN must be at least 6 digits" });
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_reset_pin", { p_user: text(form, "id"), p_pin: pin });
+  if (error) back("/admin", { error: error.message });
+  back("/admin", { ok: "PIN reset. Give the new PIN to them in person or by text." });
 }

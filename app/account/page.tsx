@@ -1,6 +1,7 @@
 import { Flash, Header } from "@/components/ui";
 import { getSession } from "@/lib/session";
-import { changePassword } from "../actions";
+import { formatPhone } from "@/lib/phone";
+import { changePin } from "../actions";
 
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
@@ -12,10 +13,10 @@ export default async function AccountPage({ searchParams }: Props) {
       <Header profile={profile} settings={settings} />
       <Flash error={error} ok={ok} />
       <div className="card max-w-sm space-y-3">
-        <p><span className="muted">Signed in as</span> {profile.email}</p>
-        <form action={changePassword} className="space-y-3">
-          <input name="password" type="password" placeholder="New password (8+ characters)" minLength={8} className="input" required autoComplete="new-password" />
-          <button className="btn">Set password</button>
+        <p><span className="muted">Signed in as</span> {formatPhone(profile.phone)}</p>
+        <form action={changePin} className="space-y-3">
+          <input name="pin" type="password" inputMode="numeric" pattern="\d{6,}" placeholder="New PIN (6+ digits)" minLength={6} className="input" required autoComplete="new-password" />
+          <button className="btn">Change PIN</button>
         </form>
       </div>
     </>

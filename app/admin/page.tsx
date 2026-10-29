@@ -1,7 +1,8 @@
 import { Flash, Header } from "@/components/ui";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
+import { formatPhone } from "@/lib/phone";
 import { hours, timeLabel } from "@/lib/time";
-import { saveEmployee, saveSettings } from "./actions";
+import { resetPin, saveEmployee, saveSettings } from "./actions";
 
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
@@ -34,7 +35,7 @@ export default async function AdminPage({ searchParams }: Props) {
             <tbody>
               {open.map((p) => (
                 <tr key={p.id}>
-                  <td>{byId.get(p.user_id)?.full_name || byId.get(p.user_id)?.email}</td>
+                  <td>{byId.get(p.user_id)?.full_name || formatPhone(byId.get(p.user_id)?.phone)}</td>
                   <td>{timeLabel(p.clock_in, tz)}</td>
                   <td>{hours((now - Date.parse(p.clock_in)) / 1000)}</td>
                   <td className="muted">{p.note}</td>
@@ -55,10 +56,10 @@ export default async function AdminPage({ searchParams }: Props) {
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-1 font-semibold">Crew</h2>
         <p className="muted mb-3 text-sm">
-          New people sign up on the login page with their own email, then show up here for you to approve.
+          New people sign up on the login page with their phone number and a PIN, then show up here for you to approve. If someone forgets their PIN, set a new one for them here.
         </p>
         <table className="tbl">
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Active</th><th></th></tr></thead>
           <tbody>
             {(people ?? []).map((p) => (
               <tr key={p.id}>
@@ -66,7 +67,7 @@ export default async function AdminPage({ searchParams }: Props) {
                   <form action={saveEmployee} className="flex flex-wrap items-center gap-2 px-2 py-1.5">
                     <input type="hidden" name="id" value={p.id} />
                     <input name="full_name" defaultValue={p.full_name} className="input w-44!" aria-label="Name" />
-                    <span className="muted min-w-48 flex-1 text-sm">{p.email}</span>
+                    <span className="muted min-w-32 flex-1 text-sm">{formatPhone(p.phone)}</span>
                     <select name="role" defaultValue={p.role} className="input w-32!" aria-label="Role">
                       <option value="employee">Employee</option>
                       <option value="admin">Manager</option>
@@ -76,6 +77,14 @@ export default async function AdminPage({ searchParams }: Props) {
                     </label>
                     <button className="btn-ghost">Save</button>
                   </form>
+                  <details className="px-2 pb-2">
+                    <summary className="muted cursor-pointer text-xs">Reset PIN</summary>
+                    <form action={resetPin} className="mt-2 flex gap-2">
+                      <input type="hidden" name="id" value={p.id} />
+                      <input name="pin" type="text" inputMode="numeric" pattern="\d{6,}" minLength={6} placeholder="New PIN (6+ digits)" className="input w-48!" required autoComplete="off" />
+                      <button className="btn-ghost">Set PIN</button>
+                    </form>
+                  </details>
                 </td>
               </tr>
             ))}

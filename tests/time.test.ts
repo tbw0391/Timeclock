@@ -23,7 +23,7 @@ describe("time helpers", () => {
 
   it("splits overtime past the weekly limit", () => {
     const rows = ["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30"].map((d) => ({
-      user_id: "u1", full_name: "Pat", email: "p@x", work_date: d, seconds: 9 * 3600,
+      user_id: "u1", full_name: "Pat", phone: "6145550100", work_date: d, seconds: 9 * 3600,
     }));
     const [w] = weekTotals(rows, 0, 40);
     expect(w.week).toBe("2026-10-25");
@@ -35,5 +35,24 @@ describe("time helpers", () => {
     expect(csvCell("=SUM(A1)")).toBe("'=SUM(A1)");
     expect(csvCell('say "hi", ok')).toBe('"say ""hi"", ok"');
     expect(csvCell(-3)).toBe("-3");
+  });
+});
+
+import { formatPhone, isPin, loginEmail, normalizePhone } from "@/lib/phone";
+
+describe("phone helpers", () => {
+  it("normalizes US numbers however they're typed", () => {
+    expect(normalizePhone("(614) 555-0100")).toBe("6145550100");
+    expect(normalizePhone("+1 614.555.0100")).toBe("6145550100");
+    expect(normalizePhone("555-0100")).toBeNull();
+  });
+  it("maps a number to its stand-in login and back to display", () => {
+    expect(loginEmail("6145550100")).toBe("6145550100@phone.timeclock.app");
+    expect(formatPhone("6145550100")).toBe("(614) 555-0100");
+  });
+  it("requires 6+ digit PINs", () => {
+    expect(isPin("123456")).toBe(true);
+    expect(isPin("12345")).toBe(false);
+    expect(isPin("12345a")).toBe(false);
   });
 });

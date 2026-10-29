@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile, Punch, Settings } from "@/lib/session";
+import { formatPhone } from "@/lib/phone";
 import { addDays, csvCell, hours, isDate, localInput, todayIn, weekStart, weekTotals, type DayRow } from "@/lib/time";
 
 // Payroll CSV: one row per punch, then weekly totals per person.
@@ -28,13 +29,13 @@ export async function GET(request: NextRequest) {
   ]);
   const byId = new Map((people ?? []).map((p) => [p.id, p]));
 
-  const lines: (string | number)[][] = [["Employee", "Email", "Date", "Clock in", "Clock out", "Hours", "Note"]];
+  const lines: (string | number)[][] = [["Employee", "Phone", "Date", "Clock in", "Clock out", "Hours", "Note"]];
   for (const p of punches ?? []) {
     const inLocal = localInput(p.clock_in, tz);
     if (inLocal.slice(0, 10) < from || inLocal.slice(0, 10) > to) continue;
     const who = byId.get(p.user_id);
     lines.push([
-      who?.full_name ?? "", who?.email ?? "", inLocal.slice(0, 10), inLocal.replace("T", " "),
+      who?.full_name ?? "", formatPhone(who?.phone), inLocal.slice(0, 10), inLocal.replace("T", " "),
       p.clock_out ? localInput(p.clock_out, tz).replace("T", " ") : "MISSING",
       p.clock_out ? hours((Date.parse(p.clock_out) - Date.parse(p.clock_in)) / 1000) : "",
       p.note,

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { back, text } from "@/lib/flash";
+import { isPin } from "@/lib/phone";
 
 export async function clockIn(form: FormData) {
   const supabase = await createClient();
@@ -20,11 +21,11 @@ export async function clockOut(form: FormData) {
   back("/", { ok: "Clocked out." });
 }
 
-export async function changePassword(form: FormData) {
-  const password = text(form, "password");
-  if (password.length < 8) back("/account", { error: "Use at least 8 characters" });
+export async function changePin(form: FormData) {
+  const password = text(form, "pin");
+  if (!isPin(password)) back("/account", { error: "PIN must be at least 6 digits" });
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
   if (error) back("/account", { error: error.message });
-  back("/account", { ok: "Password updated." });
+  back("/account", { ok: "PIN updated." });
 }

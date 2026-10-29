@@ -11,7 +11,7 @@ export function Header({ profile, settings }: { profile: Profile; settings: Sett
         {admin && <Link href="/admin">Crew</Link>}
         {admin && <Link href="/admin/timesheets">Timesheets</Link>}
         {admin && <Link href="/admin/audit">Change log</Link>}
-        <Link href="/account" className="muted">{profile.full_name || profile.email}</Link>
+        <Link href="/account" className="muted">{profile.full_name || "My account"}</Link>
         <form action="/auth/signout" method="post">
           <button className="btn-ghost">Sign out</button>
         </form>

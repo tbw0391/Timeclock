@@ -44,7 +44,7 @@ export function localInput(iso: string | null, tz: string): string {
   return new Date(iso).toLocaleString("sv-SE", { timeZone: tz }).slice(0, 16).replace(" ", "T");
 }
 
-export type DayRow = { user_id: string; full_name: string; email: string; work_date: string; seconds: number };
+export type DayRow = { user_id: string; full_name: string; phone: string | null; work_date: string; seconds: number };
 
 export type WeekTotal = {
   user_id: string;
@@ -64,7 +64,7 @@ export function weekTotals(rows: DayRow[], startsOn: number, overtimeHours: numb
     const key = `${r.user_id}|${week}`;
     let t = map.get(key);
     if (!t) {
-      t = { user_id: r.user_id, name: r.full_name || r.email, week, days: {}, seconds: 0, overtime: 0 };
+      t = { user_id: r.user_id, name: r.full_name || r.phone || "?", week, days: {}, seconds: 0, overtime: 0 };
       map.set(key, t);
     }
     const s = Number(r.seconds);
