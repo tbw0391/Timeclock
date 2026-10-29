@@ -1,6 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { GpsStatus } from "@/lib/gps";
 
 export type Profile = {
   id: string;
@@ -25,6 +26,14 @@ export type Punch = {
   clock_in: string;
   clock_out: string | null;
   note: string;
+  in_lat: number | null;
+  in_lng: number | null;
+  in_accuracy_m: number | null;
+  in_gps: GpsStatus | null;
+  out_lat: number | null;
+  out_lng: number | null;
+  out_accuracy_m: number | null;
+  out_gps: GpsStatus | null;
 };
 
 export async function getSession() {

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Flash, Header } from "@/components/ui";
+import { Flash, GpsTag, Header } from "@/components/ui";
+import { inFix, outFix } from "@/lib/gps";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import {
   addDays, dayLabel, hours, isDate, localInput, timeLabel, todayIn, weekStart, weekTotals, type DayRow,
@@ -56,6 +57,7 @@ export default async function TimesheetsPage({ searchParams }: Props) {
           </select>
         </label>
         <button className="btn">Show</button>
+        <Link href={`/api/export?${query}&format=xlsx`} className="btn-ghost" prefetch={false}>Download Excel</Link>
         <Link href={`/api/export?${query}`} className="btn-ghost" prefetch={false}>Download CSV</Link>
       </form>
 
@@ -87,7 +89,7 @@ export default async function TimesheetsPage({ searchParams }: Props) {
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-2 font-semibold">Punches</h2>
         <table className="tbl">
-          <thead><tr><th>Who</th><th>In</th><th>Out</th><th>Hours</th><th>Note</th><th></th></tr></thead>
+          <thead><tr><th>Who</th><th>In</th><th>Out</th><th>Hours</th><th>Location in / out</th><th>Note</th><th></th></tr></thead>
           <tbody>
             {punches.map((p) => (
               <tr key={p.id}>
@@ -95,6 +97,9 @@ export default async function TimesheetsPage({ searchParams }: Props) {
                 <td>{timeLabel(p.clock_in, tz)}</td>
                 <td>{p.clock_out ? timeLabel(p.clock_out, tz) : <span className="text-amber-600">missing</span>}</td>
                 <td>{p.clock_out ? hours((Date.parse(p.clock_out) - Date.parse(p.clock_in)) / 1000) : "–"}</td>
+                <td className="text-sm whitespace-nowrap">
+                  <GpsTag fix={inFix(p)} /> / {p.clock_out ? <GpsTag fix={outFix(p)} /> : "–"}
+                </td>
                 <td className="muted">{p.note}</td>
                 <td>
                   <details>
@@ -110,7 +115,7 @@ export default async function TimesheetsPage({ searchParams }: Props) {
                 </td>
               </tr>
             ))}
-            {!punches.length && <tr><td colSpan={6} className="muted">No punches in this range.</td></tr>}
+            {!punches.length && <tr><td colSpan={7} className="muted">No punches in this range.</td></tr>}
           </tbody>
         </table>
       </section>

@@ -1,6 +1,7 @@
 import { Flash, Header } from "@/components/ui";
 import { getSession, type Punch } from "@/lib/session";
 import { addDays, dayLabel, hours, timeLabel, todayIn, weekStart, weekTotals, type DayRow } from "@/lib/time";
+import { ClockForm } from "@/components/ClockButton";
 import { clockIn, clockOut } from "./actions";
 
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
@@ -41,18 +42,12 @@ export default async function Home({ searchParams }: Props) {
             <>
               <p className="text-sm uppercase tracking-wide text-green-600">On the clock</p>
               <p className="mt-1 text-lg">since {timeLabel(open.clock_in, tz)}</p>
-              <form action={clockOut} className="mx-auto mt-4 max-w-sm space-y-3">
-                <input name="note" placeholder="Note (optional)" className="input" maxLength={500} />
-                <button className="btn w-full bg-red-600! py-4 text-xl">Clock out</button>
-              </form>
+              <ClockForm action={clockOut} label="Clock out" className="btn w-full bg-red-600! py-4 text-xl" />
             </>
           ) : (
             <>
               <p className="muted text-sm uppercase tracking-wide">Off the clock</p>
-              <form action={clockIn} className="mx-auto mt-4 max-w-sm space-y-3">
-                <input name="note" placeholder="Note (optional)" className="input" maxLength={500} />
-                <button className="btn w-full bg-green-600! py-4 text-xl">Clock in</button>
-              </form>
+              <ClockForm action={clockIn} label="Clock in" className="btn w-full bg-green-600! py-4 text-xl" />
             </>
           )}
         </div>

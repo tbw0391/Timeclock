@@ -1,4 +1,5 @@
-import { Flash, Header } from "@/components/ui";
+import { Flash, GpsTag, Header } from "@/components/ui";
+import { inFix } from "@/lib/gps";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import { formatPhone } from "@/lib/phone";
 import { hours, timeLabel } from "@/lib/time";
@@ -31,13 +32,14 @@ export default async function AdminPage({ searchParams }: Props) {
         <h2 className="mb-2 font-semibold">On the clock now ({open?.length ?? 0})</h2>
         {open?.length ? (
           <table className="tbl">
-            <thead><tr><th>Who</th><th>Since</th><th>Hours so far</th><th>Note</th></tr></thead>
+            <thead><tr><th>Who</th><th>Since</th><th>Hours so far</th><th>Where</th><th>Note</th></tr></thead>
             <tbody>
               {open.map((p) => (
                 <tr key={p.id}>
                   <td>{byId.get(p.user_id)?.full_name || formatPhone(byId.get(p.user_id)?.phone)}</td>
                   <td>{timeLabel(p.clock_in, tz)}</td>
                   <td>{hours((now - Date.parse(p.clock_in)) / 1000)}</td>
+                  <td className="text-sm"><GpsTag fix={inFix(p)} /></td>
                   <td className="muted">{p.note}</td>
                 </tr>
               ))}

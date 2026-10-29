@@ -17,6 +17,12 @@ No server to run.
 - **Managers** see who's on the clock, deactivate people, fix or add missed punches
   (a reason is required and every change goes in the change log), view weekly
   totals with overtime, and download a payroll CSV.
+- **Clock-ins and clock-outs are GPS tagged.** The phone asks for location when the
+  button is tapped. If it can't get one (blocked, GPS off, timed out) the punch still
+  counts but is flagged on the timesheet and in the export. Times a manager enters
+  show as "manual".
+- **Exports:** Timesheets → **Download Excel** (Punches and Weekly totals tabs, map
+  links, hours as numbers) or **Download CSV**.
 - Punch times come from the database clock, not the phone. Employees can't write to
   the tables directly; everything goes through the functions in
   `supabase/migrations`, and row-level security keeps each employee to their own rows.
@@ -24,7 +30,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0005 in `supabase/migrations` are already applied. Don't run them
+   Migrations 0001–0006 in `supabase/migrations` are already applied. Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
    and connect an SMS provider. Twilio Verify is the simplest in the US because it

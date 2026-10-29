@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Profile, Settings } from "@/lib/session";
+import { gpsProblem, gpsText, mapUrl, type GpsFix } from "@/lib/gps";
 
 export function Header({ profile, settings }: { profile: Profile; settings: Settings }) {
   const admin = profile.role === "admin" && profile.active;
@@ -18,6 +19,20 @@ export function Header({ profile, settings }: { profile: Profile; settings: Sett
       </nav>
     </header>
   );
+}
+
+// Map link for a punch location, an amber flag when the phone sent none, or
+// "manual" for times a manager entered.
+export function GpsTag({ fix }: { fix: GpsFix }) {
+  if (fix.gps === "ok" && fix.lat != null && fix.lng != null) {
+    return (
+      <a href={mapUrl(fix.lat, fix.lng)} target="_blank" rel="noopener noreferrer" className="underline" title={gpsText(fix)}>
+        Map{fix.accuracy != null && fix.accuracy > 100 ? ` (±${Math.round(fix.accuracy)} m)` : ""}
+      </a>
+    );
+  }
+  if (gpsProblem(fix)) return <span className="text-amber-600">{gpsText(fix)}</span>;
+  return <span className="muted">manual</span>;
 }
 
 export function Flash({ error, ok }: { error?: string; ok?: string }) {

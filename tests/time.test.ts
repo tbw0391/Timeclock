@@ -56,3 +56,18 @@ describe("phone helpers", () => {
     expect(isCode("12345a")).toBe(false);
   });
 });
+
+import { gpsProblem, gpsText, mapUrl } from "@/lib/gps";
+
+describe("gps tags", () => {
+  it("describes a fix, a refusal, and a manual time", () => {
+    expect(gpsText({ gps: "ok", lat: 39.9612, lng: -82.9988, accuracy: 12.4 })).toBe("39.96120, -82.99880 (±12 m)");
+    expect(gpsText({ gps: "denied", lat: null, lng: null, accuracy: null })).toBe("Location blocked");
+    expect(gpsText({ gps: null, lat: null, lng: null, accuracy: null })).toBe("");
+  });
+  it("flags only punches the phone couldn't tag", () => {
+    expect(gpsProblem({ gps: "timeout", lat: null, lng: null, accuracy: null })).toBe(true);
+    expect(gpsProblem({ gps: null, lat: null, lng: null, accuracy: null })).toBe(false);
+    expect(mapUrl(39.9612, -82.9988)).toBe("https://www.google.com/maps?q=39.9612,-82.9988");
+  });
+});
