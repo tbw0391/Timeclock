@@ -28,5 +28,12 @@ export async function updateSession(request: NextRequest) {
     url.search = "";
     return NextResponse.redirect(url);
   }
+  // Already signed in (e.g. a double-tapped code whose second check failed): skip the login page.
+  if (user && path === "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
   return response;
 }
