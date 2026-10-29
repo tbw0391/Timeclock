@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Flash } from "@/components/ui";
 import { formatPhone, normalizePhone } from "@/lib/phone";
@@ -10,7 +11,10 @@ export default async function LoginPage({ searchParams }: Props) {
   const phone = normalizePhone(sp.phone ?? "");
   return (
     <div className="mx-auto mt-10 max-w-sm">
-      <h1 className="rainbow mb-6 text-4xl font-bold">Timeclock</h1>
+      <h1 className="mb-6">
+        <Image src="/brand/kite-wordmark.png" alt="The KITE Learning Center" width={900} height={355} priority className="h-auto w-full" />
+        <span className="mt-2 block text-center text-lg font-semibold">Timeclock</span>
+      </h1>
       <Flash error={sp.error} ok={sp.ok} />
       <div className="card">
         {phone ? (

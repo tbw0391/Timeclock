@@ -1,41 +1,40 @@
 @import "tailwindcss";
 
-/* Crayon-box theme: cream paper with confetti dots, sticker cards with colored
-   drop shadows, chunky press-down buttons. Colors that carry white text are
-   dark enough to stay readable. */
+/* The KITE Learning Center theme, from their logo: peach K, lavender I, mint T,
+   sky E, yellow bows, and charcoal offset shadows. The pastels are too light
+   for white text, so buttons are pastel with charcoal text and a charcoal
+   shadow, like the logo letters. */
 :root {
-  --bg: #fff8e7;
-  --dots-1: #ffd6e8;
-  --dots-2: #cdeffd;
+  --peach: #f9c7a1;
+  --lavender: #c49edf;
+  --mint: #b3e4da;
+  --sky: #9bcee4;
+  --bow: #ffe066;
+  --charcoal: #333235;
+
+  --bg: #fff8ef;
+  --dots-1: #fbe3d0;
+  --dots-2: #dcedf5;
   --card: #ffffff;
-  --ink: #2d1b4e;
-  --muted: #6b5b86;
-  --line: #2d1b4e;
-  --soft-line: #eadff7;
-  --accent: #7c3aed;
-  --accent-deep: #5b21b6;
-  --go: #16a34a;
-  --go-deep: #0f7a37;
-  --stop: #e11d48;
-  --stop-deep: #a3112f;
-  --pink: #ff6fb5;
-  --sky: #38bdf8;
-  --sun: #ffc93c;
-  --grass: #4ade80;
-  --tangerine: #fb923c;
+  --ink: #333235;
+  --muted: #6e6875;
+  --line: #333235;
+  --soft-line: #ece4f3;
+  --link: #7a4fb0;
+  --go: #8fd9c4;
+  --stop: #f5a88c;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1b1640;
-    --dots-1: #2c2463;
-    --dots-2: #22305e;
-    --card: #2a2257;
-    --ink: #fdf6ff;
-    --muted: #c4b5fd;
-    --line: #8b7bd8;
-    --soft-line: #3d3378;
-    --accent: #a78bfa;
-    --accent-deep: #6d4fd6;
+    --bg: #222027;
+    --dots-1: #2e2b35;
+    --dots-2: #2a3038;
+    --card: #2f2c35;
+    --ink: #f6f1fa;
+    --muted: #c9bfd6;
+    --line: #c49edf;
+    --soft-line: #403b48;
+    --link: #d4b8ec;
   }
 }
 
@@ -49,19 +48,19 @@ body {
   background-position: 0 0, 22px 22px;
 }
 
-a { color: var(--accent); }
+a { color: var(--link); }
 
 @layer components {
   .card {
     @apply rounded-3xl border-[3px] p-5;
     background: var(--card);
     border-color: var(--line);
-    box-shadow: 6px 6px 0 var(--pink);
+    box-shadow: 6px 6px 0 var(--peach);
   }
-  /* Each card on a page gets the next crayon. */
-  .card:nth-of-type(4n + 2) { box-shadow: 6px 6px 0 var(--sky); }
-  .card:nth-of-type(4n + 3) { box-shadow: 6px 6px 0 var(--sun); }
-  .card:nth-of-type(4n + 4) { box-shadow: 6px 6px 0 var(--grass); }
+  /* Each card on a page takes the next KITE letter color. */
+  .card:nth-of-type(4n + 2) { box-shadow: 6px 6px 0 var(--lavender); }
+  .card:nth-of-type(4n + 3) { box-shadow: 6px 6px 0 var(--mint); }
+  .card:nth-of-type(4n + 4) { box-shadow: 6px 6px 0 var(--sky); }
 
   .muted { color: var(--muted); }
   .input {
@@ -69,34 +68,27 @@ a { color: var(--accent); }
     background: var(--bg);
     border-color: var(--soft-line);
   }
-  .input:focus { outline: 3px solid var(--sun); outline-offset: 1px; border-color: var(--line); }
+  .input:focus { outline: 3px solid var(--bow); outline-offset: 1px; border-color: var(--line); }
 
   .btn {
-    @apply inline-flex items-center justify-center rounded-full px-5 py-2 font-semibold text-white transition-transform;
-    background: var(--accent);
-    box-shadow: 0 4px 0 var(--accent-deep);
+    @apply inline-flex items-center justify-center rounded-full border-2 px-5 py-2 font-semibold transition-transform;
+    background: var(--lavender);
+    color: var(--charcoal);
+    border-color: var(--charcoal);
+    box-shadow: 0 4px 0 var(--charcoal);
   }
-  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-deep); }
+  .btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--charcoal); }
   .btn:disabled { opacity: 0.7; }
-  .btn-go { background: var(--go); box-shadow: 0 5px 0 var(--go-deep); }
-  .btn-go:active:not(:disabled) { box-shadow: 0 1px 0 var(--go-deep); }
-  .btn-stop { background: var(--stop); box-shadow: 0 5px 0 var(--stop-deep); }
-  .btn-stop:active:not(:disabled) { box-shadow: 0 1px 0 var(--stop-deep); }
+  .btn-go { background: var(--go); box-shadow: 0 5px 0 var(--charcoal); }
+  .btn-stop { background: var(--stop); box-shadow: 0 5px 0 var(--charcoal); }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center rounded-full border-2 px-3 py-1.5 text-sm font-medium;
     border-color: var(--line);
     background: var(--card);
+    color: var(--ink);
   }
-  .btn-ghost:hover { background: var(--sun); color: #2d1b4e; }
-
-  .rainbow {
-    background: linear-gradient(90deg, var(--pink), var(--tangerine), var(--sun), var(--grass), var(--sky), var(--accent));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    width: fit-content; /* spread the whole rainbow across the word, not the row */
-  }
+  .btn-ghost:hover { background: var(--bow); color: var(--charcoal); }
 
   .tbl { @apply w-full text-sm; }
   .tbl th { @apply px-2 py-1.5 text-left font-semibold; color: var(--muted); }

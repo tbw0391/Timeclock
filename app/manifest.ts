@@ -3,16 +3,16 @@ import type { MetadataRoute } from "next";
 // Lets phones install the site as a home-screen app that opens full screen.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Timeclock",
-    short_name: "Timeclock",
+    name: "KITE Timeclock",
+    short_name: "KITE Time",
     start_url: "/",
     display: "standalone",
-    background_color: "#fff8e7",
-    theme_color: "#7c3aed",
+    background_color: "#fff8ef",
+    theme_color: "#c49edf",
     icons: [
-      { src: "/icon/192", sizes: "192x192", type: "image/png" },
-      { src: "/icon/512", sizes: "512x512", type: "image/png" },
-      { src: "/icon/512", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/brand/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/brand/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

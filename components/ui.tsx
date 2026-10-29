@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Profile, Settings } from "@/lib/session";
 import { gpsProblem, gpsText, mapUrl, type GpsFix } from "@/lib/gps";
@@ -6,7 +7,10 @@ export function Header({ profile, settings }: { profile: Profile; settings: Sett
   const admin = profile.role === "admin" && profile.active;
   return (
     <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <Link href="/" className="rainbow text-2xl font-bold">{settings.business_name}</Link>
+      <Link href="/" className="flex items-center gap-2 text-xl font-bold" style={{ color: "var(--ink)" }}>
+        <Image src="/brand/kite.png" alt="" width={24} height={42} priority />
+        {settings.business_name}
+      </Link>
       <nav className="flex flex-wrap items-center gap-3 text-sm font-medium">
         <Link href="/">My time</Link>
         {admin && <Link href="/admin">Crew</Link>}
