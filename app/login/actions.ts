@@ -13,7 +13,9 @@ export async function signIn(form: FormData) {
     email: loginEmail(phone),
     password: text(form, "pin"),
   });
-  if (error) back("/login", { error: "Phone number or PIN is wrong" });
+  // Only blame the PIN for a real credentials miss; settings problems (like the
+  // Email provider being off) need to show through.
+  if (error) back("/login", { error: error.code === "invalid_credentials" ? "Phone number or PIN is wrong" : error.message });
   redirect("/");
 }
 
