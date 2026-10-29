@@ -2,7 +2,7 @@ import { Flash, Header } from "@/components/ui";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import { formatPhone } from "@/lib/phone";
 import { hours, timeLabel } from "@/lib/time";
-import { createEmployee, resetPin, saveEmployee, saveSettings } from "./actions";
+import { createEmployee, saveEmployee, saveSettings } from "./actions";
 
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
@@ -56,12 +56,11 @@ export default async function AdminPage({ searchParams }: Props) {
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-1 font-semibold">Crew</h2>
         <p className="muted mb-3 text-sm">
-          Add people here with their phone number and a starting PIN, then give them the PIN. If someone forgets their PIN, set a new one for them here.
+          Add people here with their phone number. They sign in by getting a code texted to that number.
         </p>
         <form action={createEmployee} className="mb-4 flex flex-wrap items-center gap-2">
           <input name="full_name" placeholder="Name" className="input w-44!" required />
           <input name="phone" type="tel" inputMode="tel" placeholder="Phone number" className="input w-40!" required />
-          <input name="pin" type="text" inputMode="numeric" pattern="\d{6,}" minLength={6} placeholder="Starting PIN (6+ digits)" className="input w-52!" required autoComplete="off" />
           <button className="btn">Add employee</button>
         </form>
         <table className="tbl">
@@ -83,14 +82,6 @@ export default async function AdminPage({ searchParams }: Props) {
                     </label>
                     <button className="btn-ghost">Save</button>
                   </form>
-                  <details className="px-2 pb-2">
-                    <summary className="muted cursor-pointer text-xs">Reset PIN</summary>
-                    <form action={resetPin} className="mt-2 flex gap-2">
-                      <input type="hidden" name="id" value={p.id} />
-                      <input name="pin" type="text" inputMode="numeric" pattern="\d{6,}" minLength={6} placeholder="New PIN (6+ digits)" className="input w-48!" required autoComplete="off" />
-                      <button className="btn-ghost">Set PIN</button>
-                    </form>
-                  </details>
                 </td>
               </tr>
             ))}

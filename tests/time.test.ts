@@ -38,7 +38,7 @@ describe("time helpers", () => {
   });
 });
 
-import { formatPhone, isPin, loginEmail, normalizePhone } from "@/lib/phone";
+import { e164, formatPhone, isCode, normalizePhone } from "@/lib/phone";
 
 describe("phone helpers", () => {
   it("normalizes US numbers however they're typed", () => {
@@ -46,13 +46,13 @@ describe("phone helpers", () => {
     expect(normalizePhone("+1 614.555.0100")).toBe("6145550100");
     expect(normalizePhone("555-0100")).toBeNull();
   });
-  it("maps a number to its stand-in login and back to display", () => {
-    expect(loginEmail("6145550100")).toBe("6145550100@phone.timeclock.app");
+  it("formats a number for Supabase and for display", () => {
+    expect(e164("6145550100")).toBe("+16145550100");
     expect(formatPhone("6145550100")).toBe("(614) 555-0100");
   });
-  it("requires 6+ digit PINs", () => {
-    expect(isPin("123456")).toBe(true);
-    expect(isPin("12345")).toBe(false);
-    expect(isPin("12345a")).toBe(false);
+  it("accepts texted codes", () => {
+    expect(isCode("123456")).toBe(true);
+    expect(isCode("12345")).toBe(false);
+    expect(isCode("12345a")).toBe(false);
   });
 });
