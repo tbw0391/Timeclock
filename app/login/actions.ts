@@ -3,44 +3,40 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { back, text } from "@/lib/flash";
-import { isPin, loginEmail, normalizePhone } from "@/lib/phone";
+import { e164, isCode, normalizePhone } from "@/lib/phone";
 
-export async function signIn(form: FormData) {
+// Texts a sign-in code. shouldCreateUser lets the manager's first sign-in create
+// their account; the database trigger refuses any number nobody added, so no
+// account is made and no text goes out.
+export async function sendCode(form: FormData) {
   const phone = normalizePhone(text(form, "phone"));
   if (!phone) back("/login", { error: "Enter a 10-digit phone number" });
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: loginEmail(phone),
-    password: text(form, "pin"),
-  });
-  // Only blame the PIN for a real credentials miss; settings problems (like the
-  // Email provider being off) need to show through.
-  if (error) back("/login", { error: error.code === "invalid_credentials" ? "Phone number or PIN is wrong" : error.message });
-  redirect("/");
-}
-
-export async function signUp(form: FormData) {
-  const name = text(form, "full_name");
-  const phone = normalizePhone(text(form, "phone"));
-  const pin = text(form, "pin");
-  if (!name) back("/login?mode=signup", { error: "Enter your name" });
-  if (!phone) back("/login?mode=signup", { error: "Enter a 10-digit phone number" });
-  if (!isPin(pin)) back("/login?mode=signup", { error: "PIN must be at least 6 digits" });
-  if (pin !== text(form, "pin2")) back("/login?mode=signup", { error: "PINs don't match" });
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: loginEmail(phone),
-    password: pin,
-    options: { data: { full_name: name, phone } },
+  const { error } = await supabase.auth.signInWithOtp({
+    phone: e164(phone),
+    options: { shouldCreateUser: true, channel: "sms" },
   });
   if (error) {
-    const taken = /already registered/i.test(error.message);
-    back("/login?mode=signup", {
-      error: taken ? "That phone number already has an account. Sign in instead."
-        : /database error/i.test(error.message) ? "Only the manager sets up here. Ask your manager to add you."
+    back("/login", {
+      error: /database error/i.test(error.message)
+        ? "That number isn't set up. Ask your manager to add you."
         : error.message,
     });
   }
-  if (!data.session) back("/login", { error: "Account created but sign-in is blocked. Ask the manager to check the Supabase email settings." });
+  back(`/login?phone=${phone}`, { ok: "Code sent. It may take a minute to arrive." });
+}
+
+export async function verifyCode(form: FormData) {
+  const phone = normalizePhone(text(form, "phone"));
+  if (!phone) back("/login", { error: "Enter a 10-digit phone number" });
+  const code = text(form, "code").replace(/\s/g, "");
+  if (!isCode(code)) back(`/login?phone=${phone}`, { error: "Enter the code from the text" });
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({ phone: e164(phone), token: code, type: "sms" });
+  if (error) {
+    back(`/login?phone=${phone}`, {
+      error: error.code === "otp_expired" ? "That code is wrong or has expired. Try again or send a new one." : error.message,
+    });
+  }
   redirect("/");
 }
