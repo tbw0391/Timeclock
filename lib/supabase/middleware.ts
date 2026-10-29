@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/auth/"];
+// The icons and manifest must load before sign-in so phones can install the app.
+const PUBLIC_PATHS = ["/login", "/auth/", "/icon", "/apple-icon", "/manifest.webmanifest"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
