@@ -85,6 +85,7 @@ export function KioskBoard({ people, tz }: { people: KioskPerson[]; tz: string }
         <p className="muted mt-1">
           {mode === "exit" ? "Enter your PIN to turn off kiosk mode" : `Enter your PIN to clock ${who.on_clock ? "OUT" : "IN"}`}
         </p>
+        <p className="muted text-xs">Your PIN is the last 4 digits of your phone number unless you changed it.</p>
         <div className="my-5 flex justify-center gap-3" aria-label={`${pin.length} of 4 digits entered`}>
           {[0, 1, 2, 3].map((i) => (
             <span key={i} className="h-5 w-5 rounded-full border-2" style={{ borderColor: "var(--line)", background: i < pin.length ? "var(--line)" : "transparent" }} />

@@ -20,7 +20,9 @@ export default async function AccountPage({ searchParams }: Props) {
       <div className="card mt-4 max-w-sm space-y-3">
         <h2 className="font-semibold">Kiosk PIN {pinSet ? "✓" : ""}</h2>
         <p className="muted text-sm">
-          {pinSet ? "You have a kiosk PIN. Enter a new one to change it." : "Pick 4 digits to clock in and out on the shared kiosk tablet."}
+          {pinSet
+            ? "Use it to clock in and out on the shared kiosk tablet. It starts as the last 4 digits of your phone number; enter a new one to change it."
+            : "Pick 4 digits to clock in and out on the shared kiosk tablet."}
         </p>
         <form action={setMyKioskPin} className="flex gap-2">
           <input name="pin" type="password" inputMode="numeric" pattern="\d{4}" maxLength={4} placeholder="4 digits" className="input" required autoComplete="off" />

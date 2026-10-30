@@ -109,7 +109,7 @@ export default async function AdminPage({ searchParams }: Props) {
         <h2 className="mb-1 font-semibold">Kiosk</h2>
         <p className="muted mb-3 text-sm">
           A shared tablet where people tap their name and enter a 4-digit kiosk PIN to clock in or out.
-          Open this page on the tablet and set it up here. You&apos;ll be signed out on that device, and only a
+          Everyone&apos;s kiosk PIN starts as the last 4 digits of their phone number. Open this page on the tablet and set it up here. You&apos;ll be signed out on that device, and only a
           manager&apos;s PIN can turn kiosk mode off.
         </p>
         <form action={startKiosk} className="mb-4 flex flex-wrap gap-2">
