@@ -1,13 +1,17 @@
 import "server-only";
 import { cookies, headers } from "next/headers";
+import { KIOSK_COOKIE } from "@/lib/kiosk";
 import { DEFAULT_LOCALE, intlLocale, isLocale, LANG_COOKIE, LOCALES, type Locale } from "./locales";
 import { makeT, translateDbMessage } from "./messages";
 
-// The language is chosen per device (a cookie), so a staff phone, the kiosk
-// and the family iPad can each be set to whoever is using them. Before anyone
-// picks, the browser's own language is used if we have it.
+// The language is chosen per device (a cookie), so a staff phone and the
+// family iPad can each be set to whoever is using them. Before anyone
+// picks, the browser's own language is used if we have it. The kiosk tablet is
+// always English.
 export async function getLocale(): Promise<Locale> {
-  const chosen = (await cookies()).get(LANG_COOKIE)?.value;
+  const jar = await cookies();
+  if (jar.has(KIOSK_COOKIE)) return DEFAULT_LOCALE;
+  const chosen = jar.get(LANG_COOKIE)?.value;
   if (isLocale(chosen)) return chosen;
   const accept = (await headers()).get("accept-language") ?? "";
   for (const part of accept.split(",")) {

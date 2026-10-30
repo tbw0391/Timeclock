@@ -5,15 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n/server";
 import { KIOSK_COOKIE, type KioskPerson } from "@/lib/kiosk";
 import { KioskBoard, type KioskText } from "@/components/KioskBoard";
-import { LanguagePicker } from "@/components/LanguagePicker";
 
 export const dynamic = "force-dynamic";
 
 // The shared-tablet screen. It runs without anyone signed in; the device's
-// kiosk cookie is what lets it list people and punch. Anyone can switch the
-// kiosk's language with the buttons at the top.
+// kiosk cookie is what lets it list people and punch. Kiosks are English-only
+// (see getLocale).
 export default async function KioskPage() {
-  const { t, locale } = await getT();
+  const { t } = await getT();
   const token = (await cookies()).get(KIOSK_COOKIE)?.value;
   const supabase = await createClient();
   const [roster, info] = token
@@ -26,7 +25,6 @@ export default async function KioskPage() {
   if (!token || roster?.error || info?.error || !info?.data) {
     return (
       <div className="mx-auto mt-10 max-w-md space-y-4">
-        <LanguagePicker current={locale} label={t("common.language")} />
         <div className="card space-y-3 text-center">
           <h1 className="text-xl font-semibold">{t("kiosk.notKioskTitle")}</h1>
           <p className="muted">{t("kiosk.notKioskBody")}</p>
@@ -54,7 +52,6 @@ export default async function KioskPage() {
             <p className="muted text-sm">{t("kiosk.label", { name: info.data.kiosk_name })}</p>
           </div>
         </div>
-        <LanguagePicker current={locale} label={t("common.language")} />
       </div>
       <KioskBoard people={(roster?.data ?? []) as KioskPerson[]} tz={info.data.timezone} text={text} />
     </div>
