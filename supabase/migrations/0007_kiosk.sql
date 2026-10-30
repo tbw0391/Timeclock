@@ -59,7 +59,7 @@ begin
 end $$;
 
 create function public.kiosk_roster(p_token text)
-returns table (id uuid, name text, on_clock boolean, has_pin boolean)
+returns table (id uuid, name text, on_clock boolean, has_pin boolean, is_manager boolean)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if (kiosk_from_token(p_token)).id is null then raise exception 'This device is no longer a kiosk' using errcode = '42501'; end if;
@@ -67,10 +67,22 @@ begin
     select pr.id,
            coalesce(nullif(pr.full_name, ''), 'Phone ending ' || right(pr.phone, 4)),
            exists (select 1 from punches p where p.user_id = pr.id and p.clock_out is null),
-           exists (select 1 from kiosk_pins k where k.user_id = pr.id)
+           exists (select 1 from kiosk_pins k where k.user_id = pr.id),
+           pr.role = 'admin'
       from profiles pr
      where pr.active
      order by 2;
+end $$;
+
+-- What the kiosk screen shows: its own name, the business name and time zone.
+create function public.kiosk_settings(p_token text)
+returns table (kiosk_name text, business_name text, timezone text)
+language plpgsql stable security definer set search_path = public as $$
+declare k kiosks;
+begin
+  k := kiosk_from_token(p_token);
+  if k.id is null then raise exception 'This device is no longer a kiosk' using errcode = '42501'; end if;
+  return query select k.name, s.business_name, s.timezone from settings s;
 end $$;
 
 -- Clocks the person in, or out if they're on the clock.
@@ -171,10 +183,11 @@ begin
   return query select user_id from kiosk_pins;
 end $$;
 
-revoke execute on function public.kiosk_from_token, public.check_kiosk_pin, public.kiosk_roster,
+revoke execute on function public.kiosk_from_token, public.check_kiosk_pin, public.kiosk_roster, public.kiosk_settings,
   public.kiosk_punch, public.kiosk_exit, public.admin_create_kiosk, public.admin_delete_kiosk,
   public.admin_set_kiosk_pin, public.set_my_kiosk_pin, public.my_kiosk_pin_set,
   public.admin_kiosk_pin_users from public, anon, authenticated;
-grant execute on function public.kiosk_roster, public.kiosk_punch, public.kiosk_exit to anon, authenticated;
+grant execute on function public.kiosk_roster, public.kiosk_settings, public.kiosk_punch, public.kiosk_exit
+  to anon, authenticated;
 grant execute on function public.admin_create_kiosk, public.admin_delete_kiosk, public.admin_set_kiosk_pin,
   public.set_my_kiosk_pin, public.my_kiosk_pin_set, public.admin_kiosk_pin_users to authenticated;

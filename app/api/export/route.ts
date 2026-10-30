@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
       seconds: p.clock_out ? (Date.parse(p.clock_out) - Date.parse(p.clock_in)) / 1000 : null,
       in: inFix(p),
       out: p.clock_out ? outFix(p) : null,
+      inVia: p.in_kiosk ? ` (kiosk: ${p.in_kiosk})` : "",
+      outVia: p.out_kiosk ? ` (kiosk: ${p.out_kiosk})` : "",
       note: p.note,
     }];
   });
@@ -69,7 +71,7 @@ export async function GET(request: NextRequest) {
       ws.addRow([
         r.name, r.phone, when(`${r.date}T00:00`), when(r.inLocal), r.outLocal ? when(r.outLocal) : "MISSING",
         r.seconds != null ? Number(hours(r.seconds)) : null,
-        gpsText(r.in) || "Manual", link(r.in), r.out ? gpsText(r.out) || "Manual" : "", link(r.out), r.note,
+        `${gpsText(r.in) || "Manual"}${r.inVia}`, link(r.in), r.out ? `${gpsText(r.out) || "Manual"}${r.outVia}` : "", link(r.out), r.note,
       ]);
     }
     ws.getColumn(3).numFmt = "yyyy-mm-dd";
@@ -111,7 +113,7 @@ export async function GET(request: NextRequest) {
       r.name, r.phone, r.date, r.inLocal.replace("T", " "),
       r.outLocal ? r.outLocal.replace("T", " ") : "MISSING",
       r.seconds != null ? hours(r.seconds) : "",
-      gpsText(r.in) || "Manual", mapCell(r.in), r.out ? gpsText(r.out) || "Manual" : "", mapCell(r.out), r.note,
+      `${gpsText(r.in) || "Manual"}${r.inVia}`, mapCell(r.in), r.out ? `${gpsText(r.out) || "Manual"}${r.outVia}` : "", mapCell(r.out), r.note,
     ]);
   }
   lines.push([], ["Week of", "Employee", "Total hours", "Regular hours", "Overtime hours"]);

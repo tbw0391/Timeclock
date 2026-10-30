@@ -34,6 +34,8 @@ export type Punch = {
   out_lng: number | null;
   out_accuracy_m: number | null;
   out_gps: GpsStatus | null;
+  in_kiosk: string | null;
+  out_kiosk: string | null;
 };
 
 export async function getSession() {

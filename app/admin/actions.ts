@@ -1,12 +1,55 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { back, text } from "@/lib/flash";
+import { KIOSK_COOKIE, KIOSK_COOKIE_MAX_AGE } from "@/lib/kiosk";
 
 function returnTo(form: FormData, fallback: string) {
   const r = text(form, "return_to");
   return r.startsWith("/admin") ? r : fallback;
+}
+
+// Turns the device the manager is using into a kiosk: it gets the kiosk token
+// as a cookie, and the manager is signed out so the tablet holds no session.
+export async function startKiosk(form: FormData) {
+  const supabase = await createClient();
+  const { data: token, error } = await supabase.rpc("admin_create_kiosk", { p_name: text(form, "name") });
+  if (error || !token) back("/admin", { error: error?.message ?? "Couldn't set up the kiosk" });
+  await supabase.auth.signOut();
+  (await cookies()).set(KIOSK_COOKIE, token as string, {
+    httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: KIOSK_COOKIE_MAX_AGE,
+  });
+  redirect("/kiosk");
+}
+
+export async function deleteKiosk(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_delete_kiosk", { p_id: text(form, "id") });
+  if (error) back("/admin", { error: error.message });
+  revalidatePath("/admin");
+  back("/admin", { ok: "Kiosk removed. That device can no longer clock people in." });
+}
+
+export async function setKioskPin(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_kiosk_pin", { p_user: text(form, "id"), p_pin: text(form, "pin") });
+  if (error) back("/admin", { error: error.message });
+  revalidatePath("/admin");
+  back("/admin", { ok: "Kiosk PIN set." });
+}
+
+export async function setSuggestionStatus(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_suggestion_status", {
+    p_id: Number(text(form, "id")),
+    p_status: text(form, "status") === "done" ? "done" : "new",
+  });
+  if (error) back("/admin/suggestions", { error: error.message });
+  revalidatePath("/admin", "layout");
+  back("/admin/suggestions", {});
 }
 
 export async function saveEmployee(form: FormData) {

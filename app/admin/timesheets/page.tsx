@@ -98,7 +98,9 @@ export default async function TimesheetsPage({ searchParams }: Props) {
                 <td>{p.clock_out ? timeLabel(p.clock_out, tz) : <span className="text-amber-600">missing</span>}</td>
                 <td>{p.clock_out ? hours((Date.parse(p.clock_out) - Date.parse(p.clock_in)) / 1000) : "–"}</td>
                 <td className="text-sm whitespace-nowrap">
-                  <GpsTag fix={inFix(p)} /> / {p.clock_out ? <GpsTag fix={outFix(p)} /> : "–"}
+                  <GpsTag fix={inFix(p)} />{p.in_kiosk && <span className="muted"> ({p.in_kiosk})</span>}
+                  {" / "}
+                  {p.clock_out ? <GpsTag fix={outFix(p)} /> : "–"}{p.out_kiosk && <span className="muted"> ({p.out_kiosk})</span>}
                 </td>
                 <td className="muted">{p.note}</td>
                 <td>

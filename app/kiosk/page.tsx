@@ -1,0 +1,50 @@
+import Image from "next/image";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+import { KIOSK_COOKIE, type KioskPerson } from "@/lib/kiosk";
+import { KioskBoard } from "@/components/KioskBoard";
+
+export const dynamic = "force-dynamic";
+
+// The shared-tablet screen. It runs without anyone signed in; the device's
+// kiosk cookie is what lets it list people and punch.
+export default async function KioskPage() {
+  const token = (await cookies()).get(KIOSK_COOKIE)?.value;
+  const supabase = await createClient();
+  const [roster, info] = token
+    ? await Promise.all([
+        supabase.rpc("kiosk_roster", { p_token: token }),
+        supabase.rpc("kiosk_settings", { p_token: token }).single<{ kiosk_name: string; business_name: string; timezone: string }>(),
+      ])
+    : [null, null];
+
+  if (!token || roster?.error || info?.error || !info?.data) {
+    return (
+      <div className="mx-auto mt-10 max-w-md">
+        <div className="card space-y-3 text-center">
+          <h1 className="text-xl font-semibold">This device isn&apos;t a kiosk</h1>
+          <p className="muted">
+            A manager can turn it into one: sign in, go to <b>Crew</b>, and use <b>Set up this device as a kiosk</b>.
+          </p>
+          <Link href="/login" className="btn">Go to sign in</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Image src="/brand/kite.png" alt="" width={28} height={49} priority />
+          <div>
+            <p className="text-xl font-bold">{info.data.business_name}</p>
+            <p className="muted text-sm">{info.data.kiosk_name} kiosk</p>
+          </div>
+        </div>
+      </div>
+      <KioskBoard people={(roster?.data ?? []) as KioskPerson[]} tz={info.data.timezone} />
+    </div>
+  );
+}

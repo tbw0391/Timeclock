@@ -28,3 +28,20 @@ export async function clockOut(form: FormData) {
   revalidatePath("/");
   back("/", { ok: "Clocked out." });
 }
+
+export async function setMyKioskPin(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_my_kiosk_pin", { p_pin: text(form, "pin") });
+  if (error) back("/account", { error: error.message });
+  back("/account", { ok: "Kiosk PIN saved." });
+}
+
+export async function sendSuggestion(form: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("submit_suggestion", {
+    p_body: text(form, "body"),
+    p_anonymous: form.get("anonymous") === "on",
+  });
+  if (error) back("/suggest", { error: error.message });
+  back("/suggest", { ok: "Thanks! Your suggestion was sent to the managers." });
+}

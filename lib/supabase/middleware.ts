@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { KIOSK_COOKIE } from "@/lib/kiosk";
 
 // The icons and manifest must load before sign-in so phones can install the app.
-const PUBLIC_PATHS = ["/login", "/auth/", "/brand/", "/manifest.webmanifest"];
+// /kiosk runs signed out; its device cookie is checked by the database.
+const PUBLIC_PATHS = ["/login", "/auth/", "/brand/", "/manifest.webmanifest", "/kiosk"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -23,6 +25,14 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
+  // A kiosk tablet always shows the kiosk, whatever page it reloads.
+  if (!user && request.cookies.has(KIOSK_COOKIE) && path !== "/kiosk"
+      && !path.startsWith("/brand/") && path !== "/manifest.webmanifest") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/kiosk";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
   if (!user && !PUBLIC_PATHS.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
