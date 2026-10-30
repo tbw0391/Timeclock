@@ -17,6 +17,18 @@ No server to run.
 - **Managers** see who's on the clock, deactivate people, fix or add missed punches
   (a reason is required and every change goes in the change log), view weekly
   totals with overtime, and download a payroll CSV.
+- **Staff hub.** The home page is a grid of tools; the time clock (`/time`) is
+  one of them. New tools get a tile on `app/page.tsx`.
+- **Languages:** English, Farsi, Dari, Pashto and Arabic, picked per device with
+  the language buttons (login page, header, kiosk). Right-to-left languages flip
+  the layout. Text lives in `lib/i18n/messages/`; to add a language, add it to
+  `lib/i18n/locales.ts`, copy `en.ts`, translate, and register it in
+  `messages/index.ts` (`npm test` fails if any text is missing). The non-English
+  text was machine-drafted and should be reviewed by native speakers. Payroll
+  exports stay in English.
+- **Kiosk mode:** a shared tablet where staff tap their name and enter a 4-digit
+  kiosk PIN (defaults to the last 4 digits of their phone). Set up from Crew.
+- **Suggestion box:** anyone can send managers an idea, optionally anonymously.
 - **Clock-ins and clock-outs are GPS tagged.** The phone asks for location when the
   button is tapped. If it can't get one (blocked, GPS off, timed out) the punch still
   counts but is flagged on the timesheet and in the export. Times a manager enters
@@ -30,7 +42,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0006 in `supabase/migrations` are already applied. Don't run them
+   Migrations 0001–0009 in `supabase/migrations` are already applied. Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
    and connect an SMS provider. Twilio Verify is the simplest in the US because it

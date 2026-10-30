@@ -1,88 +1,73 @@
-import { Flash, Header } from "@/components/ui";
+import Link from "next/link";
+import { Header } from "@/components/ui";
 import { getSession, type Punch } from "@/lib/session";
-import { addDays, dayLabel, hours, timeLabel, todayIn, weekStart, weekTotals, type DayRow } from "@/lib/time";
-import { ClockForm } from "@/components/ClockButton";
-import { clockIn, clockOut } from "./actions";
-
-type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
+import { getT } from "@/lib/i18n/server";
+import { timeLabel } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home({ searchParams }: Props) {
-  const { error, ok } = await searchParams;
-  const { supabase, profile, settings } = await getSession();
-  const tz = settings.timezone;
-  const today = todayIn(tz);
-  const thisWeek = weekStart(today, settings.week_starts_on);
-  const lastWeek = addDays(thisWeek, -7);
+const COLORS = ["var(--peach)", "var(--lavender)", "var(--mint)", "var(--sky)"];
 
-  const [{ data: punches }, { data: days }] = await Promise.all([
-    supabase.from("punches").select("*").eq("user_id", profile.id)
-      .order("clock_in", { ascending: false }).limit(20).returns<Punch[]>(),
-    supabase.rpc("timesheet", { p_from: lastWeek, p_to: addDays(thisWeek, 6) }),
+type Tile = { href: string; icon: string; title: string; desc: string };
+
+// The staff hub. The time clock is one tile; new tools get a tile here.
+export default async function Hub() {
+  const { supabase, profile, settings } = await getSession();
+  const { t, intl } = await getT();
+  const admin = profile.role === "admin" && profile.active;
+  const [{ data: open }, { count: newSuggestions }] = await Promise.all([
+    supabase.from("punches").select("*").eq("user_id", profile.id).is("clock_out", null).maybeSingle<Punch>(),
+    admin
+      ? supabase.from("suggestions").select("id", { count: "exact", head: true }).eq("status", "new")
+      : Promise.resolve({ count: 0 }),
   ]);
-  const open = punches?.find((p) => !p.clock_out);
-  const weeks = weekTotals(((days ?? []) as DayRow[]).filter((d) => d.user_id === profile.id),
-    settings.week_starts_on, settings.overtime_hours);
-  const week = (start: string) => weeks.find((w) => w.week === start);
+
+  const staff: Tile[] = [
+    {
+      href: "/time", icon: "⏰", title: t("tile.timeclock"),
+      desc: open ? t("tile.timeclock.onClock", { time: timeLabel(open.clock_in, settings.timezone, intl) }) : t("tile.timeclock.offClock"),
+    },
+    { href: "/suggest", icon: "💡", title: t("tile.suggest"), desc: t("tile.suggest.desc") },
+    { href: "/account", icon: "🙂", title: t("tile.account"), desc: t("tile.account.desc") },
+  ];
+  const manager: Tile[] = admin ? [
+    { href: "/admin", icon: "👥", title: t("tile.crew"), desc: t("tile.crew.desc") },
+    { href: "/admin/timesheets", icon: "📋", title: t("tile.timesheets"), desc: t("tile.timesheets.desc") },
+    { href: "/admin/suggestions", icon: "📬", title: t("tile.suggestions"), desc: t("tile.suggestions.desc", { count: newSuggestions ?? 0 }) },
+    { href: "/admin/audit", icon: "📝", title: t("tile.audit"), desc: t("tile.audit.desc") },
+  ] : [];
+
+  const grid = (tiles: Tile[], offset = 0) => (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      {tiles.map((tile, i) => (
+        <Link
+          key={tile.href}
+          href={tile.href}
+          className="rounded-3xl border-[3px] p-5 transition-transform active:translate-y-1"
+          style={{ background: COLORS[(i + offset) % COLORS.length], borderColor: "var(--charcoal)", color: "var(--charcoal)", boxShadow: "0 5px 0 var(--charcoal)" }}
+        >
+          <span className="text-4xl" aria-hidden>{tile.icon}</span>
+          <span className="mt-2 block text-lg font-bold">{tile.title}</span>
+          <span className="block text-sm">{tile.desc}</span>
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
     <>
       <Header profile={profile} settings={settings} />
-      <Flash error={error} ok={ok} />
-
-      {!profile.active ? (
-        <div className="card">
-          <h2 className="text-lg font-semibold">Waiting for approval</h2>
-          <p className="muted mt-1">A manager needs to approve your account before you can clock in.</p>
-        </div>
-      ) : (
-        <div className="card mb-6 text-center">
-          {open ? (
-            <>
-              <p className="text-sm uppercase tracking-wide text-green-600">On the clock</p>
-              <p className="mt-1 text-lg">since {timeLabel(open.clock_in, tz)}</p>
-              <ClockForm action={clockOut} label="Clock out" className="btn btn-stop w-full py-4 text-2xl" />
-            </>
-          ) : (
-            <>
-              <p className="muted text-sm uppercase tracking-wide">Off the clock</p>
-              <ClockForm action={clockIn} label="Clock in" className="btn btn-go w-full py-4 text-2xl" />
-            </>
-          )}
-        </div>
+      <h1 className="mb-4 text-2xl font-bold">
+        {profile.full_name ? t("hub.greeting", { name: profile.full_name }) : t("hub.greetingNoName")}
+      </h1>
+      <h2 className="muted mb-2 text-sm font-semibold uppercase tracking-wide">{t("hub.staffTools")}</h2>
+      {grid(staff)}
+      {admin && (
+        <>
+          <h2 className="muted mb-2 mt-8 text-sm font-semibold uppercase tracking-wide">{t("hub.managerTools")}</h2>
+          {grid(manager, 1)}
+        </>
       )}
-
-      <div className="mb-6 grid gap-4 sm:grid-cols-2">
-        {[["This week", thisWeek], ["Last week", lastWeek]].map(([label, start]) => {
-          const w = week(start);
-          return (
-            <div key={start} className="card">
-              <p className="muted text-sm">{label} · {dayLabel(start)} – {dayLabel(addDays(start, 6))}</p>
-              <p className="mt-1 text-3xl font-semibold">{hours(w?.seconds ?? 0)} h</p>
-              {!!w?.overtime && <p className="text-sm text-amber-600">{hours(w.overtime)} h overtime</p>}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="card overflow-x-auto">
-        <h2 className="mb-2 font-semibold">Recent punches</h2>
-        <table className="tbl">
-          <thead><tr><th>In</th><th>Out</th><th>Hours</th><th>Note</th></tr></thead>
-          <tbody>
-            {(punches ?? []).map((p) => (
-              <tr key={p.id}>
-                <td>{timeLabel(p.clock_in, tz)}</td>
-                <td>{p.clock_out ? timeLabel(p.clock_out, tz) : <span className="text-green-600">open</span>}</td>
-                <td>{p.clock_out ? hours((Date.parse(p.clock_out) - Date.parse(p.clock_in)) / 1000) : "–"}</td>
-                <td className="muted">{p.note}</td>
-              </tr>
-            ))}
-            {!punches?.length && <tr><td colSpan={4} className="muted">No punches yet.</td></tr>}
-          </tbody>
-        </table>
-      </div>
     </>
   );
 }

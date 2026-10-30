@@ -23,18 +23,21 @@ function locate(): Promise<Record<string, string>> {
   });
 }
 
-function Submit({ label, className }: { label: string; className: string }) {
+type Labels = { pending: string; note: string; locationNote: string };
+
+function Submit({ label, pendingLabel, className }: { label: string; pendingLabel: string; className: string }) {
   const { pending } = useFormStatus();
   return (
     <button className={className} disabled={pending}>
-      {pending ? "Getting location…" : label}
+      {pending ? pendingLabel : label}
     </button>
   );
 }
 
-export function ClockForm({ action, label, className }: {
+export function ClockForm({ action, label, labels, className }: {
   action: (form: FormData) => Promise<void>;
   label: string;
+  labels: Labels;
   className: string;
 }) {
   return (
@@ -45,9 +48,9 @@ export function ClockForm({ action, label, className }: {
       }}
       className="mx-auto mt-4 max-w-sm space-y-3"
     >
-      <input name="note" placeholder="Note (optional)" className="input" maxLength={500} />
-      <Submit label={label} className={className} />
-      <p className="muted text-xs">Your location is saved with each clock-in and clock-out.</p>
+      <input name="note" placeholder={labels.note} className="input" maxLength={500} />
+      <Submit label={label} pendingLabel={labels.pending} className={className} />
+      <p className="muted text-xs">{labels.locationNote}</p>
     </form>
   );
 }

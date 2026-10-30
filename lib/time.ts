@@ -26,14 +26,15 @@ export function hours(seconds: number): string {
   return (seconds / 3600).toFixed(2);
 }
 
-export function dayLabel(date: string): string {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
+// intl is a BCP 47 locale (see intlLocale); English when not given.
+export function dayLabel(date: string, intl = "en-US"): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString(intl, {
     timeZone: "UTC", weekday: "short", month: "numeric", day: "numeric",
   });
 }
 
-export function timeLabel(iso: string, tz: string): string {
-  return new Date(iso).toLocaleString("en-US", {
+export function timeLabel(iso: string, tz: string, intl = "en-US"): string {
+  return new Date(iso).toLocaleString(intl, {
     timeZone: tz, weekday: "short", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit",
   });
 }

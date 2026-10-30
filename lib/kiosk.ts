@@ -5,4 +5,4 @@ export const KIOSK_COOKIE_MAX_AGE = 60 * 60 * 24 * 400; // browsers cap cookies 
 
 export type KioskPerson = { id: string; name: string; on_clock: boolean; has_pin: boolean; is_manager: boolean };
 
-export type KioskResult = { ok: boolean; message: string; nonce: number };
+export type KioskResult = { ok: boolean; message: string; nonce: number; action?: "in" | "out" };

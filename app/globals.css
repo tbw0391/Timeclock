@@ -39,6 +39,7 @@
 }
 
 body {
+  font-family: var(--font-latin), var(--font-arabic), system-ui, sans-serif;
   color: var(--ink);
   background-color: var(--bg);
   background-image:
@@ -91,6 +92,6 @@ a { color: var(--link); }
   .btn-ghost:hover { background: var(--bow); color: var(--charcoal); }
 
   .tbl { @apply w-full text-sm; }
-  .tbl th { @apply px-2 py-1.5 text-left font-semibold; color: var(--muted); }
+  .tbl th { @apply px-2 py-1.5 text-start font-semibold; color: var(--muted); }
   .tbl td { @apply border-t-2 border-dashed px-2 py-1.5 align-top; border-color: var(--soft-line); }
 }

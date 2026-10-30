@@ -2,14 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getT } from "@/lib/i18n/server";
 import { KIOSK_COOKIE, type KioskPerson } from "@/lib/kiosk";
-import { KioskBoard } from "@/components/KioskBoard";
+import { KioskBoard, type KioskText } from "@/components/KioskBoard";
+import { LanguagePicker } from "@/components/LanguagePicker";
 
 export const dynamic = "force-dynamic";
 
 // The shared-tablet screen. It runs without anyone signed in; the device's
-// kiosk cookie is what lets it list people and punch.
+// kiosk cookie is what lets it list people and punch. Anyone can switch the
+// kiosk's language with the buttons at the top.
 export default async function KioskPage() {
+  const { t, locale } = await getT();
   const token = (await cookies()).get(KIOSK_COOKIE)?.value;
   const supabase = await createClient();
   const [roster, info] = token
@@ -21,30 +25,38 @@ export default async function KioskPage() {
 
   if (!token || roster?.error || info?.error || !info?.data) {
     return (
-      <div className="mx-auto mt-10 max-w-md">
+      <div className="mx-auto mt-10 max-w-md space-y-4">
+        <LanguagePicker current={locale} label={t("common.language")} />
         <div className="card space-y-3 text-center">
-          <h1 className="text-xl font-semibold">This device isn&apos;t a kiosk</h1>
-          <p className="muted">
-            A manager can turn it into one: sign in, go to <b>Crew</b>, and use <b>Set up this device as a kiosk</b>.
-          </p>
-          <Link href="/login" className="btn">Go to sign in</Link>
+          <h1 className="text-xl font-semibold">{t("kiosk.notKioskTitle")}</h1>
+          <p className="muted">{t("kiosk.notKioskBody")}</p>
+          <Link href="/login" className="btn">{t("kiosk.goSignIn")}</Link>
         </div>
       </div>
     );
   }
 
+  const text: KioskText = {
+    tapName: t("kiosk.tapName"), whichManager: t("kiosk.whichManager"), onClock: t("kiosk.onClock"),
+    offClock: t("kiosk.offClock"), nobody: t("kiosk.nobody"), needsPin: t("kiosk.needsPin"), hi: t("kiosk.hi"),
+    enterPinIn: t("kiosk.enterPinIn"), enterPinOut: t("kiosk.enterPinOut"), enterPinExit: t("kiosk.enterPinExit"),
+    pinHint: t("kiosk.pinHint"), digitsEntered: t("kiosk.digitsEntered"), checking: t("kiosk.checking"),
+    deleteDigit: t("kiosk.deleteDigit"), turnOff: t("kiosk.turnOff"), cancel: t("common.cancel"), back: t("common.back"),
+  };
+
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Image src="/brand/kite.png" alt="" width={28} height={49} priority />
           <div>
             <p className="text-xl font-bold">{info.data.business_name}</p>
-            <p className="muted text-sm">{info.data.kiosk_name} kiosk</p>
+            <p className="muted text-sm">{t("kiosk.label", { name: info.data.kiosk_name })}</p>
           </div>
         </div>
+        <LanguagePicker current={locale} label={t("common.language")} />
       </div>
-      <KioskBoard people={(roster?.data ?? []) as KioskPerson[]} tz={info.data.timezone} />
+      <KioskBoard people={(roster?.data ?? []) as KioskPerson[]} tz={info.data.timezone} text={text} />
     </div>
   );
 }

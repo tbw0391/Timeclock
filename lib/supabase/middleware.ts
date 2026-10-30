@@ -4,7 +4,7 @@ import { KIOSK_COOKIE } from "@/lib/kiosk";
 
 // The icons and manifest must load before sign-in so phones can install the app.
 // /kiosk runs signed out; its device cookie is checked by the database.
-const PUBLIC_PATHS = ["/login", "/auth/", "/brand/", "/manifest.webmanifest", "/kiosk"];
+const PUBLIC_PATHS = ["/login", "/auth/", "/brand/", "/manifest.webmanifest", "/kiosk", "/lang"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -27,7 +27,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   // A kiosk tablet always shows the kiosk, whatever page it reloads.
   if (!user && request.cookies.has(KIOSK_COOKIE) && path !== "/kiosk"
-      && !path.startsWith("/brand/") && path !== "/manifest.webmanifest") {
+      && !path.startsWith("/brand/") && path !== "/manifest.webmanifest" && path !== "/lang") {
     const url = request.nextUrl.clone();
     url.pathname = "/kiosk";
     url.search = "";
