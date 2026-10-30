@@ -15,11 +15,13 @@ export default async function Hub() {
   const { supabase, profile, settings } = await getSession();
   const { t, intl } = await getT();
   const admin = profile.role === "admin" && profile.active;
-  const [{ data: open }, { count: newSuggestions }] = await Promise.all([
+  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }] = await Promise.all([
     supabase.from("punches").select("*").eq("user_id", profile.id).is("clock_out", null).maybeSingle<Punch>(),
     admin
       ? supabase.from("suggestions").select("id", { count: "exact", head: true }).eq("status", "new")
       : Promise.resolve({ count: 0 }),
+    supabase.from("children").select("id", { count: "exact", head: true }).eq("active", true),
+    supabase.from("child_attendance").select("id", { count: "exact", head: true }).is("checked_out_at", null),
   ]);
 
   const staff: Tile[] = [
@@ -27,6 +29,7 @@ export default async function Hub() {
       href: "/time", icon: "⏰", title: t("tile.timeclock"),
       desc: open ? t("tile.timeclock.onClock", { time: timeLabel(open.clock_in, settings.timezone, intl) }) : t("tile.timeclock.offClock"),
     },
+    { href: "/children", icon: "🧒", title: t("tile.children"), desc: t("tile.children.desc", { here: kidsHere ?? 0, total: kidsTotal ?? 0 }) },
     { href: "/suggest", icon: "💡", title: t("tile.suggest"), desc: t("tile.suggest.desc") },
     { href: "/account", icon: "🙂", title: t("tile.account"), desc: t("tile.account.desc") },
   ];

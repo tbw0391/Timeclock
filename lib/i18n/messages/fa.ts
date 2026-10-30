@@ -209,6 +209,18 @@ export const fa: Messages = {
   "audit.edit": "اصلاح",
   "audit.delete": "حذف",
 
+  "tile.children": "حضور کودکان",
+  "tile.children.desc": "{here} از {total} کودک حاضرند",
+  "kids.title": "🧒 حضور کودکان",
+  "kids.here": "حاضر: {here} / {total}",
+  "kids.hint": "برای ثبت ورود روی کودک بزنید. برای ثبت خروج دوباره بزنید.",
+  "kids.inAt": "ورود {time}",
+  "kids.leftAt": "خروج {time}",
+  "kids.notYet": "هنوز نیامده",
+  "kids.checkedIn": "ورود {name} در ساعت {time} ثبت شد.",
+  "kids.checkedOut": "خروج {name} در ساعت {time} ثبت شد.",
+  "kids.none": "هنوز کودکی ثبت نشده است.",
+
   "db.notSetUp": "این شماره تلفن ثبت نشده است",
   "db.alreadyIn": "شما قبلاً ورود ثبت کرده‌اید",
   "db.notIn": "شما ورود ثبت نکرده‌اید",
@@ -232,4 +244,5 @@ export const fa: Messages = {
   "db.managerExit": "فقط مدیر می‌تواند از حالت کیوسک خارج شود.",
   "db.writeFirst": "اول پیشنهاد خود را بنویسید",
   "db.tooLong": "لطفاً کمتر از ۲۰۰۰ نویسه بنویسید",
+  "db.childNotFound": "کودک پیدا نشد",
 };

@@ -209,6 +209,18 @@ export const ps: Messages = {
   "audit.edit": "سمول",
   "audit.delete": "ړنګول",
 
+  "tile.children": "د ماشومانو حاضري",
+  "tile.children.desc": "له {total} ماشومانو {here} حاضر دي",
+  "kids.title": "🧒 د ماشومانو حاضري",
+  "kids.here": "اوس حاضر: {here} / {total}",
+  "kids.hint": "د راتګ ثبتولو لپاره ماشوم کېکاږئ. د وتلو لپاره بیا یې کېکاږئ.",
+  "kids.inAt": "راغی {time}",
+  "kids.leftAt": "لاړ {time}",
+  "kids.notYet": "تر اوسه نه دی راغلی",
+  "kids.checkedIn": "د {name} راتګ په {time} ثبت شو.",
+  "kids.checkedOut": "د {name} وتل په {time} ثبت شول.",
+  "kids.none": "تر اوسه ماشوم نشته.",
+
   "db.notSetUp": "دا د ټیلیفون شمېره ثبت نه ده",
   "db.alreadyIn": "تاسو دمخه راتګ ثبت کړی",
   "db.notIn": "تاسو راتګ نه دی ثبت کړی",
@@ -232,4 +244,5 @@ export const ps: Messages = {
   "db.managerExit": "یوازې مدیر کولی شي د کیوسک له حالت ووځي.",
   "db.writeFirst": "لومړی خپل وړاندیز ولیکئ",
   "db.tooLong": "مهرباني وکړئ له ۲۰۰۰ تورو لږ ولیکئ",
+  "db.childNotFound": "ماشوم ونه موندل شو",
 };

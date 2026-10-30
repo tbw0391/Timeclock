@@ -218,6 +218,18 @@ export const en = {
   "audit.edit": "edit",
   "audit.delete": "delete",
 
+  "tile.children": "Check-in",
+  "tile.children.desc": "{here} of {total} children here",
+  "kids.title": "🧒 Children check-in",
+  "kids.here": "Here now: {here} / {total}",
+  "kids.hint": "Tap a child to check them in. Tap again to check them out.",
+  "kids.inAt": "In at {time}",
+  "kids.leftAt": "Left at {time}",
+  "kids.notYet": "Not here yet",
+  "kids.checkedIn": "{name} checked in at {time}.",
+  "kids.checkedOut": "{name} checked out at {time}.",
+  "kids.none": "No children yet.",
+
   // Messages that come back from the database
   "db.notSetUp": "That phone number is not set up",
   "db.alreadyIn": "You are already clocked in",
@@ -242,6 +254,7 @@ export const en = {
   "db.managerExit": "Only a manager can exit kiosk mode.",
   "db.writeFirst": "Write your suggestion first",
   "db.tooLong": "Please keep it under 2000 characters",
+  "db.childNotFound": "Child not found",
 } as const;
 
 export type MessageKey = keyof typeof en;

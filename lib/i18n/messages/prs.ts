@@ -210,6 +210,18 @@ export const prs: Messages = {
   "audit.edit": "اصلاح",
   "audit.delete": "حذف",
 
+  "tile.children": "حاضری اطفال",
+  "tile.children.desc": "{here} از {total} طفل حاضر اند",
+  "kids.title": "🧒 حاضری اطفال",
+  "kids.here": "حاضر: {here} / {total}",
+  "kids.hint": "برای ثبت آمدن روی طفل بزنید. برای ثبت رفتن دوباره بزنید.",
+  "kids.inAt": "آمد {time}",
+  "kids.leftAt": "رفت {time}",
+  "kids.notYet": "هنوز نیامده",
+  "kids.checkedIn": "آمدن {name} در ساعت {time} ثبت شد.",
+  "kids.checkedOut": "رفتن {name} در ساعت {time} ثبت شد.",
+  "kids.none": "هنوز طفلی ثبت نشده است.",
+
   "db.notSetUp": "این نمبر تیلفون ثبت نشده است",
   "db.alreadyIn": "شما قبلاً ورود ثبت کرده‌اید",
   "db.notIn": "شما ورود ثبت نکرده‌اید",
@@ -233,4 +245,5 @@ export const prs: Messages = {
   "db.managerExit": "فقط مدیر می‌تواند از حالت کیوسک خارج شود.",
   "db.writeFirst": "اول پیشنهاد خود را بنویسید",
   "db.tooLong": "لطفاً کمتر از ۲۰۰۰ نویسه بنویسید",
+  "db.childNotFound": "طفل پیدا نشد",
 };

@@ -209,6 +209,18 @@ export const ar: Messages = {
   "audit.edit": "تصحيح",
   "audit.delete": "حذف",
 
+  "tile.children": "حضور الأطفال",
+  "tile.children.desc": "{here} من {total} طفلًا حاضرون",
+  "kids.title": "🧒 حضور الأطفال",
+  "kids.here": "الحاضرون الآن: {here} / {total}",
+  "kids.hint": "اضغط على الطفل لتسجيل وصوله. اضغط مرة أخرى لتسجيل مغادرته.",
+  "kids.inAt": "وصل {time}",
+  "kids.leftAt": "غادر {time}",
+  "kids.notYet": "لم يصل بعد",
+  "kids.checkedIn": "تم تسجيل وصول {name} الساعة {time}.",
+  "kids.checkedOut": "تم تسجيل مغادرة {name} الساعة {time}.",
+  "kids.none": "لا يوجد أطفال بعد.",
+
   "db.notSetUp": "رقم الهاتف هذا غير مسجّل",
   "db.alreadyIn": "لقد سجّلت الدخول بالفعل",
   "db.notIn": "لم تسجّل الدخول",
@@ -232,4 +244,5 @@ export const ar: Messages = {
   "db.managerExit": "المدير فقط يمكنه إيقاف وضع الكشك.",
   "db.writeFirst": "اكتب اقتراحك أولًا",
   "db.tooLong": "يرجى ألا يتجاوز النص 2000 حرف",
+  "db.childNotFound": "الطفل غير موجود",
 };
