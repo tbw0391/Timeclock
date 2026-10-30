@@ -62,3 +62,14 @@ No server to run.
     npm install
     npm run dev
     npm test
+
+## Public website
+
+A copy of thekitelc.com (the Wix site) lives at `/site`, built from
+`lib/site/content.ts` (pages made of a few kinds of sections) and the photos in
+`public/site`. It needs no sign-in and is English-only.
+
+To serve it at a domain's root, set `SITE_HOSTS` (e.g.
+`thekitelc.com,www.thekitelc.com`) and `STAFF_URL` (e.g.
+`https://staff.thekitelc.com`) in Vercel; the middleware then maps
+`thekitelc.com/preschool` to `/site/preschool`, so the Wix URLs keep working.

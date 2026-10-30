@@ -26,9 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { locale, dir } = await getT();
   return (
     <html lang={locale} dir={dir} className={`${fredoka.variable} ${arabic.variable}`}>
-      <body className="min-h-screen antialiased">
-        <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
-      </body>
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }

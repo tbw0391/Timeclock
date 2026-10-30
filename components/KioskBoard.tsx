@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { kioskExit, kioskPunch } from "@/app/kiosk/actions";
+import { kioskExit, kioskPunch } from "@/app/(staff)/kiosk/actions";
 import type { KioskPerson, KioskResult } from "@/lib/kiosk";
 
 const COLORS = ["var(--peach)", "var(--lavender)", "var(--mint)", "var(--sky)"];
