@@ -229,6 +229,18 @@ export const en = {
   "kids.checkedIn": "{name} checked in at {time}.",
   "kids.checkedOut": "{name} checked out at {time}.",
   "kids.none": "No children yet.",
+  "tile.website": "Website",
+  "tile.website.desc": "Banner and pages",
+  "site.title": "🌐 Website",
+  "site.banner": "Top banner",
+  "site.bannerHint": "Shown across the top of every page of the website, like \"No school on Monday\". The website is in English.",
+  "site.bannerPlaceholder": "No school on …",
+  "site.bannerUntil": "Last day to show it (optional; it hides itself after this day)",
+  "site.bannerOff": "No banner is showing right now.",
+  "site.bannerClear": "Remove banner",
+  "site.bannerSaved": "Banner saved.",
+  "site.bannerCleared": "Banner removed.",
+  "site.view": "Open the website",
 
   // Messages that come back from the database
   "db.notSetUp": "That phone number is not set up",
@@ -255,6 +267,7 @@ export const en = {
   "db.writeFirst": "Write your suggestion first",
   "db.tooLong": "Please keep it under 2000 characters",
   "db.childNotFound": "Child not found",
+  "db.bannerTooLong": "Please keep the banner under 200 characters",
 } as const;
 
 export type MessageKey = keyof typeof en;

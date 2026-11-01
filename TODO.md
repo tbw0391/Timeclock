@@ -6,7 +6,7 @@
       (and later the public) aren't asked to log in to Vercel. Then check
       https://timeclock-tbw0391.vercel.app/site on a phone.
 - [ ] **Website editor** (step 2): a 🌐 Website tile for managers to
-  - [ ] change the top banner ("No school on …")
+  - [x] change the top banner ("No school on …")
   - [ ] edit page text, prices and the calendar
   - [ ] add, reorder and remove photos from a phone (with a photo-permission reminder)
   - [ ] contact form that saves messages in the app (replaces the Wix forms)

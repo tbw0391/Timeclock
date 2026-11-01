@@ -57,6 +57,19 @@ export async function setSuggestionStatus(form: FormData) {
   back("/admin/suggestions", {});
 }
 
+export async function saveNotice(form: FormData) {
+  const { t, db } = await getT();
+  const supabase = await createClient();
+  const clear = text(form, "clear") === "1";
+  const { error } = await supabase.rpc("admin_set_notice", {
+    p_text: clear ? "" : text(form, "text"),
+    p_until: clear ? null : text(form, "until") || null,
+  });
+  if (error) back("/admin/website", { error: db(error.message) });
+  revalidatePath("/site", "layout");
+  back("/admin/website", { ok: clear ? t("site.bannerCleared") : t("site.bannerSaved") });
+}
+
 export async function saveEmployee(form: FormData) {
   const { t, db } = await getT();
   const supabase = await createClient();

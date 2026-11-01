@@ -36,6 +36,7 @@ export default async function Hub() {
   const manager: Tile[] = admin ? [
     { href: "/admin", icon: "👥", title: t("tile.crew"), desc: t("tile.crew.desc") },
     { href: "/admin/timesheets", icon: "📋", title: t("tile.timesheets"), desc: t("tile.timesheets.desc") },
+    { href: "/admin/website", icon: "🌐", title: t("tile.website"), desc: t("tile.website.desc") },
     { href: "/admin/suggestions", icon: "📬", title: t("tile.suggestions"), desc: t("tile.suggestions.desc", { count: newSuggestions ?? 0 }) },
     { href: "/admin/audit", icon: "📝", title: t("tile.audit"), desc: t("tile.audit.desc") },
   ] : [];

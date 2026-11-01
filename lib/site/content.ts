@@ -15,8 +15,6 @@ export const SITE = {
   instagram: "https://www.instagram.com/thekitelearningcenter/",
   facebook: "https://www.facebook.com/profile.php?id=100092585280876",
   footnote: "The KITE Learning Center is a 501(c)3 public charity under the IRS Section 170.",
-  // Shown in a banner across the top of every page; empty hides it.
-  notice: "No school on November 3rd.",
 };
 
 export type Button = { label: string; href: string };

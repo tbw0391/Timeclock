@@ -1,19 +1,19 @@
 import { MENU, SITE } from "@/lib/site/content";
 import { siteHref } from "@/lib/site/base";
-import { siteBase } from "@/lib/site/server";
+import { siteBase, siteNotice } from "@/lib/site/server";
 import { photo } from "@/components/site/Sections";
 
 // The public website's frame: notice banner, logo and menu, and footer.
 // STAFF_URL (e.g. https://staff.thekitelc.com) is where the staff app lives once
 // the site has its own domain. It is English-only and left-to-right whatever language the staff app is in.
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const base = await siteBase();
+  const [base, notice] = await Promise.all([siteBase(), siteNotice()]);
   const link = (slug: string) => siteHref(base, "/" + slug);
   return (
     <div dir="ltr" lang="en" className="flex min-h-screen flex-col">
-      {SITE.notice && (
+      {notice && (
         <p className="border-b-[3px] px-4 py-2 text-center font-semibold" style={{ background: "var(--bow)", color: "var(--charcoal)", borderColor: "var(--charcoal)" }}>
-          {SITE.notice}
+          {notice}
         </p>
       )}
       <header className="relative border-b-[3px] bg-white" style={{ borderColor: "var(--charcoal)" }}>
