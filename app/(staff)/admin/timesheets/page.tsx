@@ -62,6 +62,8 @@ export default async function TimesheetsPage({ searchParams }: Props) {
         <button className="btn">{t("ts.show")}</button>
         <Link href={`/api/export?${query}&format=xlsx`} className="btn-ghost" prefetch={false}>{t("ts.excel")}</Link>
         <Link href={`/api/export?${query}`} className="btn-ghost" prefetch={false}>{t("ts.csv")}</Link>
+        <Link href={`/api/export?${query}&format=gusto`} className="btn-ghost" prefetch={false}>{t("ts.gusto")}</Link>
+        <p className="muted w-full text-sm">{t("ts.gustoHint")}</p>
       </form>
 
       <section className="card mb-6 overflow-x-auto">

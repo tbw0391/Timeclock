@@ -4,24 +4,32 @@ import { getT } from "@/lib/i18n/server";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import { formatPhone } from "@/lib/phone";
 import { hours, timeLabel } from "@/lib/time";
-import { createEmployee, deleteKiosk, saveEmployee, saveSettings, setKioskPin, startKiosk } from "./actions";
+import { callQuickbooks, quickbooksOn, type QboStatus } from "@/lib/quickbooks";
+import {
+  createEmployee, deleteKiosk, qboConnect, qboDisconnect, qboSync, qboSyncFrom, saveEmployee, saveSettings, setKioskPin, startKiosk,
+} from "./actions";
 
-type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
+type Props = { searchParams: Promise<{ error?: string; ok?: string; qbo?: string }> };
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage({ searchParams }: Props) {
-  const { error, ok } = await searchParams;
+  const { error, ok, qbo: qboBack } = await searchParams;
   const { supabase, profile, settings } = await requireAdmin();
   const { t, intl } = await getT();
   const tz = settings.timezone;
-  const [{ data: people }, { data: open }, { data: kiosks }, { data: pinUsers }] = await Promise.all([
+  const [{ data: people }, { data: open }, { data: kiosks }, { data: pinUsers }, qbo] = await Promise.all([
     supabase.from("profiles").select("*").order("full_name").returns<Profile[]>(),
     supabase.from("punches").select("*").is("clock_out", null).order("clock_in").returns<Punch[]>(),
     supabase.from("kiosks").select("id, name, created_at, last_used_at").order("created_at")
       .returns<{ id: string; name: string; created_at: string; last_used_at: string | null }[]>(),
     supabase.rpc("admin_kiosk_pin_users"),
+    quickbooksOn() ? callQuickbooks<QboStatus>("status") : null,
   ]);
+  // Where Intuit sends the manager back after connecting.
+  const qboFlash = qboBack === "connected" ? { ok: t("qbo.connected") }
+    : qboBack === "cancelled" ? { error: t("qbo.cancelled") }
+    : qboBack === "failed" ? { error: t("qbo.failed") } : {};
   const hasPin = new Set((pinUsers ?? []) as string[]);
   const byId = new Map((people ?? []).map((p) => [p.id, p]));
   const pending = (people ?? []).filter((p) => !p.active);
@@ -33,7 +41,7 @@ export default async function AdminPage({ searchParams }: Props) {
   return (
     <>
       <Header profile={profile} settings={settings} />
-      <Flash error={error} ok={ok} />
+      <Flash error={error ?? qboFlash.error} ok={ok ?? qboFlash.ok} />
 
       <section className="card mb-6">
         <h2 className="mb-2 font-semibold">{t("crew.onClockNow", { count: open?.length ?? 0 })}</h2>
@@ -153,6 +161,44 @@ export default async function AdminPage({ searchParams }: Props) {
           <button className="btn justify-self-start">{t("crew.saveSettings")}</button>
         </form>
       </section>
+
+      {qbo && (
+        <section className="card mt-6 max-w-lg">
+          <h2 className="mb-1 font-semibold">{t("qbo.title")}</h2>
+          <p className="muted mb-3 text-sm">{t("qbo.intro")}</p>
+          {qbo.error || !qbo.data ? (
+            <p className="text-sm text-red-700">{qbo.error}</p>
+          ) : !qbo.data.configured ? (
+            <p className="text-sm">{t("qbo.notConfigured")}</p>
+          ) : !qbo.data.connected ? (
+            <form action={qboConnect}>
+              <button className="btn">{t("qbo.connect")}</button>
+            </form>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold">
+                {t("qbo.connectedTo", { company: qbo.data.company || "QuickBooks" })}
+                {qbo.data.sandbox && <span className="muted"> · {t("qbo.sandbox")}</span>}
+              </p>
+              <form action={qboSyncFrom} className="flex flex-wrap items-end gap-2">
+                <label>{t("qbo.syncFrom")}
+                  <input type="date" name="date" defaultValue={qbo.data.sync_from ?? ""} className="input mt-1" required />
+                </label>
+                <button className="btn-ghost">{t("qbo.saveDate")}</button>
+              </form>
+              <p>
+                {t("qbo.pending", { count: qbo.data.pending ?? 0 })}
+                {qbo.data.last_sync_at && <span className="muted"> · {t("qbo.lastSync", { time: timeLabel(qbo.data.last_sync_at, tz, intl) })}</span>}
+              </p>
+              {qbo.data.last_error && <p className="whitespace-pre-wrap text-amber-700">{t("qbo.problems")} {qbo.data.last_error}</p>}
+              <div className="flex flex-wrap gap-3">
+                <form action={qboSync}><button className="btn">{t("qbo.syncNow")}</button></form>
+                <form action={qboDisconnect}><button className="btn-ghost">{t("qbo.disconnect")}</button></form>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </>
   );
 }

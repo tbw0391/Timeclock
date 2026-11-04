@@ -4,10 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import type { Profile, Punch, Settings } from "@/lib/session";
 import { gpsText, inFix, mapUrl, outFix, type GpsFix } from "@/lib/gps";
 import { formatPhone } from "@/lib/phone";
+import { GUSTO_HEADER, gustoRows } from "@/lib/gusto";
 import { addDays, csvCell, hours, isDate, localInput, todayIn, weekStart, weekTotals, type DayRow } from "@/lib/time";
 
 // Payroll export: one row per punch (with GPS tags), then weekly totals per
-// person. ?format=xlsx gives an Excel workbook with a tab for each; otherwise CSV.
+// person. ?format=xlsx gives an Excel workbook with a tab for each,
+// ?format=gusto the file Gusto's "Import hours" takes; otherwise CSV.
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: isAdmin } = await supabase.rpc("is_admin");
@@ -53,6 +55,15 @@ export async function GET(request: NextRequest) {
   const weeks = weekTotals(((days ?? []) as DayRow[]).filter((d) => !user || d.user_id === user),
     settings!.week_starts_on, Number(settings!.overtime_hours));
   const filename = `timesheet-${from}-to-${to}`;
+  const csvResponse = (lines: (string | number)[][], name: string) =>
+    new NextResponse(lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n", {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${name}.csv"`,
+      },
+    });
+
+  if (sp.get("format") === "gusto") return csvResponse([GUSTO_HEADER, ...gustoRows(weeks)], `gusto-hours-${from}-to-${to}`);
 
   if (sp.get("format") === "xlsx") {
     const wb = new ExcelJS.Workbook();
@@ -121,11 +132,5 @@ export async function GET(request: NextRequest) {
     lines.push([w.week, w.name, hours(w.seconds), hours(w.seconds - w.overtime), hours(w.overtime)]);
   }
 
-  const csv = lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
-  return new NextResponse(csv, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${filename}.csv"`,
-    },
-  });
+  return csvResponse(lines, filename);
 }

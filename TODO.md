@@ -1,6 +1,8 @@
 # To do
 
 ## Now
+- [ ] **Not committed yet** (as of Nov 3): the banner editor (migration 0011 is already applied), the
+      "Download for Gusto" button, and the QuickBooks sync (kept off: payroll is in Gusto). Commit and push to deploy, then try the 🌐 Website tile on a phone.
 - [ ] **Vercel login wall** (Todd): Vercel → `timeclock` → Settings → Deployment Protection. If
       "Vercel Authentication" covers all deployments, switch to Standard Protection so staff
       (and later the public) aren't asked to log in to Vercel. Then check
@@ -13,7 +15,8 @@
 
 ## Waiting on Todd
 - [ ] New-family forms for the iPad paperwork (put them in `../forms/`, outside git)
-- [ ] Gusto: their hours-import template and how employee names appear, for a "Download for Gusto" button
+- [ ] Gusto: try "Download for Gusto" (Timesheets) on one pay period in Gusto → Run payroll → Import hours;
+      say if a column or a name doesn't match (columns copied from the estimator app, not yet checked against Gusto)
 
 ## Moving the website off Wix
 - [ ] Rebuild done at `/site`; compare it side by side with thekitelc.com

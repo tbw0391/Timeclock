@@ -34,7 +34,10 @@ No server to run.
   counts but is flagged on the timesheet and in the export. Times a manager enters
   show as "manual".
 - **Exports:** Timesheets → **Download Excel** (Punches and Weekly totals tabs, map
-  links, hours as numbers) or **Download CSV**.
+  links, hours as numbers) or **Download CSV**. **Download for Gusto** gives the file
+  Gusto takes under Run payroll → Import hours: `first_name, last_name, regular_hours,
+  overtime_hours` per person for the dates picked, overtime worked out week by week.
+  Names are split on the last word, so they need to match Gusto's.
 - Punch times come from the database clock, not the phone. Employees can't write to
   the tables directly; everything goes through the functions in
   `supabase/migrations`, and row-level security keeps each employee to their own rows.
@@ -42,7 +45,8 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 in `supabase/migrations` are already applied. Don't run them
+   Migrations 0001–0011 in `supabase/migrations` are already applied (0012 is
+   QuickBooks, which is off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
    and connect an SMS provider. Twilio Verify is the simplest in the US because it
@@ -77,3 +81,27 @@ To serve it at a domain's root, set `SITE_HOSTS` (e.g.
 `thekitelc.com,www.thekitelc.com`) and `STAFF_URL` (e.g.
 `https://staff.thekitelc.com`) in Vercel; the middleware then maps
 `thekitelc.com/preschool` to `/site/preschool`, so the Wix URLs keep working.
+
+## QuickBooks (off)
+
+Copied from the estimator app in case payroll moves to QuickBooks Payroll. When it's on,
+a manager connects QuickBooks from a card at the bottom of Crew, picks the first day to
+send, and taps **Send to QuickBooks**. Each finished punch goes across as a timesheet
+entry (TimeActivity) under a QuickBooks employee with the same name (created if missing),
+dated the day the shift started. Edited punches are sent again; deleted ones are deleted
+in QuickBooks too. Nothing else (pay rates, overtime, payroll runs) is sent.
+
+None of it is live yet. To turn it on:
+
+1. Apply `supabase/migrations/0012_quickbooks.sql`.
+2. At developer.intuit.com, create an app (Accounting scope) or reuse the estimator's, and
+   add the redirect URI `https://ejoihhozsrrtmunxhvfy.supabase.co/functions/v1/quickbooks`.
+3. Supabase → Edge Functions → secrets: `QBO_CLIENT_ID`, `QBO_CLIENT_SECRET`, and
+   `QBO_ENV` (`sandbox` for a test company, `production` for the real books).
+4. Deploy `supabase/functions/quickbooks` with JWT verification off
+   (`supabase functions deploy quickbooks --no-verify-jwt`); Intuit's return trip has no
+   sign-in, and the function checks managers itself.
+5. Vercel: set `QUICKBOOKS=on` so the card shows on Crew.
+
+Try it against a sandbox company first. Payroll is in Gusto (Nov 2026), so it stays off.
+

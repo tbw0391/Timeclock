@@ -1,12 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { back, text } from "@/lib/flash";
 import { KIOSK_COOKIE, KIOSK_COOKIE_MAX_AGE } from "@/lib/kiosk";
 import { getT } from "@/lib/i18n/server";
+import { callQuickbooks } from "@/lib/quickbooks";
 
 function returnTo(form: FormData, fallback: string) {
   const r = text(form, "return_to");
@@ -141,4 +142,49 @@ export async function createEmployee(form: FormData) {
   if (error) back("/admin", { error: db(error.message) });
   revalidatePath("/admin");
   back("/admin", { ok: t("crew.added") });
+}
+
+// QuickBooks card on the Crew page (only shown when QuickBooks is turned on).
+async function qboError(code: string) {
+  const { t } = await getT();
+  return code === "qbo_not_configured" ? t("qbo.notConfigured") : code;
+}
+
+export async function qboConnect() {
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const { data, error } = await callQuickbooks<{ url: string }>("connect", { return_to: `${proto}://${h.get("host")}` });
+  if (error || !data) back("/admin", { error: await qboError(error ?? "") });
+  redirect(data.url);
+}
+
+export async function qboSyncFrom(form: FormData) {
+  const { t } = await getT();
+  const { error } = await callQuickbooks("sync_from", { date: text(form, "date") });
+  if (error) back("/admin", { error: await qboError(error) });
+  back("/admin", { ok: t("qbo.dateSaved") });
+}
+
+// The function sends a batch at a time; keep going until it's caught up.
+export async function qboSync() {
+  const { t } = await getT();
+  let sent = 0;
+  const problems: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const { data, error } = await callQuickbooks<{ done: boolean; pushed: { time: number; deleted: number }; errors: string[] }>("sync");
+    if (error || !data) back("/admin", { error: await qboError(error ?? "") });
+    sent += data.pushed.time + data.pushed.deleted;
+    problems.push(...data.errors);
+    if (data.done) break;
+  }
+  revalidatePath("/admin");
+  if (problems.length) back("/admin", { error: `${t("qbo.sent", { count: sent })} ${t("qbo.problems")} ${problems.slice(0, 3).join("; ")}` });
+  back("/admin", { ok: t("qbo.sent", { count: sent }) });
+}
+
+export async function qboDisconnect() {
+  const { t } = await getT();
+  const { error } = await callQuickbooks("disconnect");
+  if (error) back("/admin", { error: await qboError(error) });
+  back("/admin", { ok: t("qbo.disconnected") });
 }
