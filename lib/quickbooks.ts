@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { callFunction } from "@/lib/edge";
 
 // QuickBooks is off unless QUICKBOOKS=on is set in Vercel (and the
 // `quickbooks` edge function is deployed with its secrets; see README).
@@ -16,12 +16,4 @@ export type QboStatus = {
   pending: number | null;
 };
 
-// Calls the edge function as the signed-in manager. Errors come back as the
-// function's error code or message.
-export async function callQuickbooks<T>(action: string, extra: Record<string, unknown> = {}): Promise<{ data?: T; error?: string }> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.functions.invoke("quickbooks", { body: { action, ...extra } });
-  if (!error) return { data: data as T };
-  const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
-  return { error: body?.error ?? error.message };
-}
+export const callQuickbooks = <T>(action: string, extra?: Record<string, unknown>) => callFunction<T>("quickbooks", action, extra);

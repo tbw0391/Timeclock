@@ -45,8 +45,8 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 in `supabase/migrations` are already applied (0012 is
-   QuickBooks, which is off; see below). Don't run them
+   Migrations 0001–0011 in `supabase/migrations` are already applied (0012
+   QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
    and connect an SMS provider. Twilio Verify is the simplest in the US because it
@@ -104,4 +104,35 @@ None of it is live yet. To turn it on:
 5. Vercel: set `QUICKBOOKS=on` so the card shows on Crew.
 
 Try it against a sandbox company first. Payroll is in Gusto (Nov 2026), so it stays off.
+
+## Gusto (off until Gusto approves the app)
+
+Payroll is in Gusto. Until this is on, use Timesheets → **Download for Gusto**. When it's
+on, a 🔗 Gusto tile opens `/admin/gusto`, where a manager connects Gusto, picks the first
+day to send, and checks who is who (people whose name matches one Gusto employee exactly
+are matched for them). **Send to Gusto** sends each finished shift to Gusto's Time
+Tracking API as a time sheet, split into Regular and Overtime hours using Crew → Settings
+(overtime counted by the pay week, in shift order). In Gusto the hours wait until the
+admin picks Run payroll → Sync hours from connected time tracking apps. A changed shift,
+or one whose overtime moved because of an edit earlier in the week, is deleted and sent
+again; deleted shifts are deleted in Gusto. Shifts for people not matched are held back
+and counted on the page. A shift changed after its pay period was paid needs an off-cycle
+payroll in Gusto, and Gusto may refuse to change hours already synced to payroll (the
+error shows on the page).
+
+Built from Gusto's docs, not yet run against Gusto. To turn it on:
+
+1. Apply `supabase/migrations/0013_gusto.sql`.
+2. In Gusto's Developer Portal (dev.gusto.com), create a time tracking app with the
+   redirect URI `https://ejoihhozsrrtmunxhvfy.supabase.co/functions/v1/gusto`, and get it
+   approved for production. It needs to read employees and write time sheets
+   (`time_sheet:write`).
+3. Supabase → Edge Functions → secrets: `GUSTO_CLIENT_ID`, `GUSTO_CLIENT_SECRET`, and
+   `GUSTO_ENV` (`demo` for Gusto's test site, `production` for the real account).
+4. Deploy `supabase/functions/gusto` with JWT verification off
+   (`supabase functions deploy gusto --no-verify-jwt`).
+5. Vercel: set `GUSTO=on`.
+
+Try it on Gusto's demo site first. The overtime split lives in
+`supabase/functions/_shared/overtime.ts` (tested in `tests/overtime.test.ts`).
 
