@@ -1,9 +1,8 @@
 # To do
 
 ## Now
-- [ ] **Not committed yet** (as of Nov 6): the live Gusto connection (off until Gusto approves the app).
-      The banner editor, "Download for Gusto" and QuickBooks (off) went out in the Nov 4 commits;
-      try the 🌐 Website tile on a phone.
+- [ ] Try the 🌐 Website tile (banner editor) on a phone. Everything through the live Gusto
+      connection (off) is committed and pushed (Nov 6, "gusto").
 - [ ] **Vercel login wall** (Todd): Vercel → `timeclock` → Settings → Deployment Protection. If
       "Vercel Authentication" covers all deployments, switch to Standard Protection so staff
       (and later the public) aren't asked to log in to Vercel. Then check
