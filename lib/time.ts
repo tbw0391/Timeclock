@@ -84,3 +84,8 @@ export function csvCell(v: string | number): string {
   if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
+
+// "Dec 1, 2026": a calendar day (expiry dates, last days) in the reader's language.
+export function dateLabel(date: string, intl = "en-US"): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString(intl, { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" });
+}

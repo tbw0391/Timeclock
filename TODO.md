@@ -33,7 +33,7 @@
 - [ ] Cancel the Wix plan
 
 ## Later hub features
-- [ ] Announcements + certifications
+- [x] Announcements + certifications (Nov 7); enter everyone's certifications under 🎓
 - [ ] Time-off requests
 - [ ] Staff schedule
 

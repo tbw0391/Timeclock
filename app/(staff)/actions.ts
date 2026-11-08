@@ -50,3 +50,12 @@ export async function sendSuggestion(form: FormData) {
   if (error) back("/suggest", { error: db(error.message) });
   back("/suggest", { ok: t("suggest.thanks") });
 }
+
+// "Got it" on an announcement at the top of the hub.
+export async function readAnnouncement(form: FormData) {
+  const { db } = await getT();
+  const { error } = await (await createClient()).rpc("read_announcement", { p_id: Number(text(form, "id")) });
+  if (error) back("/", { error: db(error.message) });
+  revalidatePath("/");
+  back("/", {});
+}

@@ -45,7 +45,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 and 0014–0018 in `supabase/migrations` are already applied
+   Migrations 0001–0011 and 0014–0019 in `supabase/migrations` are already applied
    (0012 QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
@@ -66,6 +66,18 @@ No server to run.
     npm install
     npm run dev
     npm test
+
+## Announcements and certifications
+
+📣 **Announcements** (`/admin/announcements`): a manager posts a note, with an
+optional last day. Every active staff member sees it at the top of the hub
+until they tap "Got it"; the manager sees who has read it.
+
+🎓 **Certifications** (`/admin/certifications`): CPR, first aid, background
+checks and anything else with an expiry date, per person. The page lists what's
+expired or due within 60 days (`lib/certifications.ts`); the hub tile shows the
+count. Staff see their own on the Account page, and a warning on the hub when
+one of theirs is due.
 
 ## Public website
 
