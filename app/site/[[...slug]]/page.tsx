@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SectionView } from "@/components/site/Sections";
-import { SITE, pageFor } from "@/lib/site/content";
-import { siteBase } from "@/lib/site/server";
+import { SITE } from "@/lib/site/content";
+import { siteBase, siteContact, sitePage } from "@/lib/site/server";
 
 type Props = { params: Promise<{ slug?: string[] }> };
 
-const find = async (params: Props["params"]) => pageFor((await params).slug?.join("/") ?? "");
+const find = async (params: Props["params"]) => sitePage((await params).slug?.join("/") ?? "");
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await find(params);
@@ -20,6 +20,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SitePage({ params }: Props) {
   const page = await find(params);
   if (!page) notFound();
-  const base = await siteBase();
-  return page.sections.map((s, i) => <SectionView key={i} section={s} base={base} index={i} />);
+  const [base, contact] = await Promise.all([siteBase(), siteContact()]);
+  return page.sections.map((s, i) => <SectionView key={i} section={s} base={base} index={i} contact={contact} />);
 }

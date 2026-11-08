@@ -1,15 +1,16 @@
 # To do
 
 ## Now
-- [ ] Try the 🌐 Website tile (banner editor) on a phone. Everything through the live Gusto
-      connection (off) is committed and pushed (Nov 6, "gusto").
+- [ ] Try the 🌐 Website tile on a phone: the banner, a page's words (e.g. Preschool prices
+      and calendar) and the contact details. The page editor (Nov 7) isn't committed yet;
+      its database change (0014) is applied.
 - [ ] **Vercel login wall** (Todd): Vercel → `timeclock` → Settings → Deployment Protection. If
       "Vercel Authentication" covers all deployments, switch to Standard Protection so staff
       (and later the public) aren't asked to log in to Vercel. Then check
       https://timeclock-tbw0391.vercel.app/site on a phone.
 - [ ] **Website editor** (step 2): a 🌐 Website tile for managers to
   - [x] change the top banner ("No school on …")
-  - [ ] edit page text, prices and the calendar
+  - [x] edit page text, prices, the calendar, button links and contact details
   - [ ] add, reorder and remove photos from a phone (with a photo-permission reminder)
   - [ ] contact form that saves messages in the app (replaces the Wix forms)
 

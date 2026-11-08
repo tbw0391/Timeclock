@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { OFFICE_HOURS, SITE, type Button, type Section } from "@/lib/site/content";
+import type { Button, Contact, Section } from "@/lib/site/content";
 import { siteHref } from "@/lib/site/base";
 
 const COLORS = ["var(--peach)", "var(--lavender)", "var(--mint)", "var(--sky)"];
@@ -55,7 +55,7 @@ function Heading({ children }: { children: React.ReactNode }) {
   return <h2 className="mb-4 text-3xl font-bold sm:text-4xl">{children}</h2>;
 }
 
-export function SectionView({ section: s, base, index }: { section: Section; base: string; index: number }) {
+export function SectionView({ section: s, base, index, contact }: { section: Section; base: string; index: number; contact: Contact }) {
   switch (s.kind) {
     case "hero":
       return (
@@ -203,20 +203,20 @@ export function SectionView({ section: s, base, index }: { section: Section; bas
             {s.title && <Heading>{s.title}</Heading>}
             {s.text && <p className="mb-3 text-lg">{s.text}</p>}
             <p className="text-lg leading-relaxed">
-              <a href={`tel:+1${SITE.phone.replace(/\D/g, "")}`} className="font-semibold">{SITE.phone}</a><br />
-              <a href={`mailto:${SITE.email}`} className="font-semibold">{SITE.email}</a><br />
-              <a href={`https://maps.google.com/?q=${encodeURIComponent(SITE.address.join(", "))}`} target="_blank" rel="noopener">
-                {SITE.address[0]}<br />{SITE.address[1]}
+              <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="font-semibold">{contact.phone}</a><br />
+              <a href={`mailto:${contact.email}`} className="font-semibold">{contact.email}</a><br />
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(contact.address.join(", "))}`} target="_blank" rel="noopener">
+                {contact.address[0]}<br />{contact.address[1]}
               </a>
             </p>
           </div>
           <div>
             <h3 className="mb-2 text-xl font-bold">Office Hours</h3>
-            <p className="text-lg">{OFFICE_HOURS}</p>
+            <p className="text-lg">{contact.hours}</p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <a href={`tel:+1${SITE.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--mint)", color: "var(--charcoal)" }}>Call</a>
-              <a href={`sms:+1${SITE.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--sky)", color: "var(--charcoal)" }}>Text</a>
-              <a href={`mailto:${SITE.email}`} className="btn" style={{ background: "var(--peach)", color: "var(--charcoal)" }}>Email</a>
+              <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--mint)", color: "var(--charcoal)" }}>Call</a>
+              <a href={`sms:+1${contact.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--sky)", color: "var(--charcoal)" }}>Text</a>
+              <a href={`mailto:${contact.email}`} className="btn" style={{ background: "var(--peach)", color: "var(--charcoal)" }}>Email</a>
             </div>
           </div>
         </section>

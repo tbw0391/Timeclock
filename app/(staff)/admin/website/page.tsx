@@ -1,21 +1,26 @@
 import { Flash, Header } from "@/components/ui";
 import { requireAdmin } from "@/lib/session";
 import { getT } from "@/lib/i18n/server";
-import { saveNotice } from "../actions";
+import { PAGES } from "@/lib/site/content";
+import { editedPages, siteContact } from "@/lib/site/server";
+import { saveContact, saveNotice } from "../actions";
 
 type Notice = { text: string; until: string | null };
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
 export const dynamic = "force-dynamic";
 
-// Website editor. For now just the banner across the top of every page.
+// Website editor: the banner across the top, each page's words, and the
+// contact details. Photos come later.
 export default async function WebsitePage({ searchParams }: Props) {
   const { error, ok } = await searchParams;
   const { supabase, profile, settings } = await requireAdmin();
   const { t } = await getT();
-  const [{ data: row }, { data: showing }] = await Promise.all([
+  const [{ data: row }, { data: showing }, edited, contact] = await Promise.all([
     supabase.from("site_content").select("value").eq("key", "notice").maybeSingle<{ value: Notice }>(),
     supabase.rpc("site_notice"),
+    editedPages(),
+    siteContact(),
   ]);
   const notice = row?.value ?? { text: "", until: null };
 
@@ -24,7 +29,7 @@ export default async function WebsitePage({ searchParams }: Props) {
       <Header profile={profile} settings={settings} />
       <Flash error={error} ok={ok} />
       <h1 className="mb-4 text-2xl font-bold">{t("site.title")}</h1>
-      <section className="card max-w-lg">
+      <section className="card mb-6 max-w-lg">
         <h2 className="mb-1 font-semibold">{t("site.banner")}</h2>
         <p className="muted mb-3 text-sm">{t("site.bannerHint")}</p>
         {/* Preview in the website's own colors. The site is English-only. */}
@@ -45,6 +50,49 @@ export default async function WebsitePage({ searchParams }: Props) {
             <button className="btn">{t("common.save")}</button>
             <button name="clear" value="1" className="btn-ghost">{t("site.bannerClear")}</button>
           </div>
+        </form>
+      </section>
+
+      <section className="card mb-6 max-w-lg">
+        <h2 className="mb-1 font-semibold">{t("site.pages")}</h2>
+        <p className="muted mb-3 text-sm">{t("site.pagesHint")}</p>
+        <ul className="divide-y">
+          {PAGES.map((p) => (
+            <li key={p.slug}>
+              <a href={`/admin/website/edit?page=${p.slug}`} className="flex items-center justify-between gap-3 py-2.5">
+                <span dir="ltr">
+                  {p.slug ? p.title : "Home"}
+                  {edited.has(p.slug) && <span className="ms-2 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">{t("site.edited")}</span>}
+                </span>
+                <span className="text-sm underline">{t("site.edit")}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="card max-w-lg">
+        <h2 className="mb-1 font-semibold">{t("site.contact")}</h2>
+        <p className="muted mb-3 text-sm">{t("site.contactHint")}</p>
+        <form action={saveContact} className="space-y-3">
+          <label className="block text-sm">
+            {t("site.phone")}
+            <input name="phone" dir="ltr" type="tel" required defaultValue={contact.phone} className="input mt-1" />
+          </label>
+          <label className="block text-sm">
+            {t("site.email")}
+            <input name="email" dir="ltr" type="email" required defaultValue={contact.email} className="input mt-1" />
+          </label>
+          <label className="block text-sm">
+            {t("site.address")}
+            <input name="address1" dir="ltr" required defaultValue={contact.address[0]} className="input mt-1" />
+            <input name="address2" dir="ltr" required defaultValue={contact.address[1]} className="input mt-2" />
+          </label>
+          <label className="block text-sm">
+            {t("site.hours")}
+            <input name="hours" dir="ltr" required defaultValue={contact.hours} className="input mt-1" />
+          </label>
+          <button className="btn">{t("common.save")}</button>
         </form>
       </section>
       <p className="mt-4 text-sm">

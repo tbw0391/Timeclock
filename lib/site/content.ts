@@ -9,12 +9,19 @@ export const DONATE = "https://www.zeffy.com/en-US/donation-form/donate-to-the-k
 
 export const SITE = {
   name: "The KITE Learning Center",
-  phone: "(614) 598-8991",
-  email: "thekitelc@gmail.com",
-  address: ["5100 Dierker Rd.", "Columbus, Ohio 43220"],
   instagram: "https://www.instagram.com/thekitelearningcenter/",
   facebook: "https://www.facebook.com/profile.php?id=100092585280876",
   footnote: "The KITE Learning Center is a 501(c)3 public charity under the IRS Section 170.",
+};
+
+// Phone, email, address and office hours, shown in the footer and the contact
+// boxes. Managers can change them on the Website page; these are the originals.
+export type Contact = { phone: string; email: string; address: [string, string]; hours: string };
+export const CONTACT: Contact = {
+  phone: "(614) 598-8991",
+  email: "thekitelc@gmail.com",
+  address: ["5100 Dierker Rd.", "Columbus, Ohio 43220"],
+  hours: "Monday, Wednesday, Friday from 12:00 PM to 3:00 PM",
 };
 
 export type Button = { label: string; href: string };
@@ -408,7 +415,5 @@ export const MENU: { label: string; links: { label: string; slug: string }[] }[]
     { label: "Contact Us", slug: "contactus" },
   ] },
 ];
-
-export const OFFICE_HOURS = "Monday, Wednesday, Friday from 12:00 PM to 3:00 PM";
 
 export const pageFor = (slug: string) => PAGES.find((p) => p.slug === slug);

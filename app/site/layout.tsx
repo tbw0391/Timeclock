@@ -1,13 +1,13 @@
 import { MENU, SITE } from "@/lib/site/content";
 import { siteHref } from "@/lib/site/base";
-import { siteBase, siteNotice } from "@/lib/site/server";
+import { siteBase, siteContact, siteNotice } from "@/lib/site/server";
 import { photo } from "@/components/site/Sections";
 
 // The public website's frame: notice banner, logo and menu, and footer.
 // STAFF_URL (e.g. https://staff.thekitelc.com) is where the staff app lives once
 // the site has its own domain. It is English-only and left-to-right whatever language the staff app is in.
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [base, notice] = await Promise.all([siteBase(), siteNotice()]);
+  const [base, notice, contact] = await Promise.all([siteBase(), siteNotice(), siteContact()]);
   const link = (slug: string) => siteHref(base, "/" + slug);
   return (
     <div dir="ltr" lang="en" className="flex min-h-screen flex-col">
@@ -67,11 +67,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
           <div>
             <p className="font-bold">{SITE.name}</p>
-            <p>{SITE.address[0]}<br />{SITE.address[1]}</p>
+            <p>{contact.address[0]}<br />{contact.address[1]}</p>
           </div>
           <div>
-            <a href={`tel:+1${SITE.phone.replace(/\D/g, "")}`} className="block font-semibold" style={{ color: "#7a4fb0" }}>{SITE.phone}</a>
-            <a href={`mailto:${SITE.email}`} className="block font-semibold" style={{ color: "#7a4fb0" }}>{SITE.email}</a>
+            <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="block font-semibold" style={{ color: "#7a4fb0" }}>{contact.phone}</a>
+            <a href={`mailto:${contact.email}`} className="block font-semibold" style={{ color: "#7a4fb0" }}>{contact.email}</a>
             <div className="mt-2 flex gap-4">
               <a href={SITE.instagram} target="_blank" rel="noopener" style={{ color: "#7a4fb0" }}>Instagram</a>
               <a href={SITE.facebook} target="_blank" rel="noopener" style={{ color: "#7a4fb0" }}>Facebook</a>

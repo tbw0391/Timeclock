@@ -45,8 +45,8 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 in `supabase/migrations` are already applied (0012
-   QuickBooks and 0013 Gusto are off; see below). Don't run them
+   Migrations 0001–0011 and 0014 in `supabase/migrations` are already applied
+   (0012 QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
    and connect an SMS provider. Twilio Verify is the simplest in the US because it
@@ -73,9 +73,13 @@ A copy of thekitelc.com (the Wix site) lives at `/site`, built from
 `lib/site/content.ts` (pages made of a few kinds of sections) and the photos in
 `public/site`. It needs no sign-in and is English-only.
 
-Managers edit it from the 🌐 Website tile (`/admin/website`). So far that's the
-banner across the top of every page, with an optional last day after which it
-hides itself; it's stored in the `site_content` table.
+Managers edit it from the 🌐 Website tile (`/admin/website`): the banner across
+the top of every page (with an optional last day after which it hides itself),
+the words, prices, calendar dates and button links on each page, and the
+phone, email, address and office hours. Edits are stored in the `site_content`
+table and laid over `lib/site/content.ts` (`lib/site/edit.ts`); a page with no
+edits, or whose sections in the code have changed kind or number, shows the
+code's version. Photos and layout aren't editable yet.
 
 To serve it at a domain's root, set `SITE_HOSTS` (e.g.
 `thekitelc.com,www.thekitelc.com`) and `STAFF_URL` (e.g.
