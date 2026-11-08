@@ -8,8 +8,6 @@ import { back, text } from "@/lib/flash";
 import { KIOSK_COOKIE, KIOSK_COOKIE_MAX_AGE } from "@/lib/kiosk";
 import { getT } from "@/lib/i18n/server";
 import { callQuickbooks } from "@/lib/quickbooks";
-import { contactFrom, sectionsFrom } from "@/lib/site/edit";
-import { siteContact, sitePage } from "@/lib/site/server";
 
 function returnTo(form: FormData, fallback: string) {
   const r = text(form, "return_to");
@@ -58,46 +56,6 @@ export async function setSuggestionStatus(form: FormData) {
   if (error) back("/admin/suggestions", { error: db(error.message) });
   revalidatePath("/admin", "layout");
   back("/admin/suggestions", {});
-}
-
-export async function saveNotice(form: FormData) {
-  const { t, db } = await getT();
-  const supabase = await createClient();
-  const clear = text(form, "clear") === "1";
-  const { error } = await supabase.rpc("admin_set_notice", {
-    p_text: clear ? "" : text(form, "text"),
-    p_until: clear ? null : text(form, "until") || null,
-  });
-  if (error) back("/admin/website", { error: db(error.message) });
-  revalidatePath("/site", "layout");
-  back("/admin/website", { ok: clear ? t("site.bannerCleared") : t("site.bannerSaved") });
-}
-
-// One page's words and links. Starts from the page as the website shows it
-// now, so anything not on the form (photos) stays the same.
-export async function savePage(form: FormData) {
-  const { t, db } = await getT();
-  const slug = text(form, "slug");
-  const page = await sitePage(slug);
-  const to = `/admin/website/edit?page=${encodeURIComponent(slug)}`;
-  if (!page) back("/admin/website", { error: t("common.somethingWrong") });
-  const reset = text(form, "reset") === "1";
-  const sections = sectionsFrom((name) => { const v = form.get(name); return typeof v === "string" ? v : null; }, page.sections);
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("admin_set_site_content", { p_key: `page:${slug}`, p_value: reset ? null : { sections } });
-  if (error) back(to, { error: db(error.message) });
-  revalidatePath("/site", "layout");
-  back(to, { ok: reset ? t("site.pageReset") : t("site.pageSaved") });
-}
-
-export async function saveContact(form: FormData) {
-  const { t, db } = await getT();
-  const contact = contactFrom((name) => text(form, name), await siteContact());
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("admin_set_site_content", { p_key: "contact", p_value: contact });
-  if (error) back("/admin/website", { error: db(error.message) });
-  revalidatePath("/site", "layout");
-  back("/admin/website", { ok: t("site.contactSaved") });
 }
 
 export async function saveEmployee(form: FormData) {

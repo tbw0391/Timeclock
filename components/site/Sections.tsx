@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import type { Button, Contact, Section } from "@/lib/site/content";
 import { siteHref } from "@/lib/site/base";
+import { SITE_UI } from "@/lib/site/strings";
 
 const COLORS = ["var(--peach)", "var(--lavender)", "var(--mint)", "var(--sky)"];
 
@@ -55,7 +56,7 @@ function Heading({ children }: { children: React.ReactNode }) {
   return <h2 className="mb-4 text-3xl font-bold sm:text-4xl">{children}</h2>;
 }
 
-export function SectionView({ section: s, base, index, contact }: { section: Section; base: string; index: number; contact: Contact }) {
+export function SectionView({ section: s, base, index, contact, tr }: { section: Section; base: string; index: number; contact: Contact; tr: (s: string) => string }) {
   switch (s.kind) {
     case "hero":
       return (
@@ -211,12 +212,12 @@ export function SectionView({ section: s, base, index, contact }: { section: Sec
             </p>
           </div>
           <div>
-            <h3 className="mb-2 text-xl font-bold">Office Hours</h3>
+            <h3 className="mb-2 text-xl font-bold">{tr(SITE_UI.officeHours)}</h3>
             <p className="text-lg">{contact.hours}</p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--mint)", color: "var(--charcoal)" }}>Call</a>
-              <a href={`sms:+1${contact.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--sky)", color: "var(--charcoal)" }}>Text</a>
-              <a href={`mailto:${contact.email}`} className="btn" style={{ background: "var(--peach)", color: "var(--charcoal)" }}>Email</a>
+              <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--mint)", color: "var(--charcoal)" }}>{tr(SITE_UI.call)}</a>
+              <a href={`sms:+1${contact.phone.replace(/\D/g, "")}`} className="btn" style={{ background: "var(--sky)", color: "var(--charcoal)" }}>{tr(SITE_UI.text)}</a>
+              <a href={`mailto:${contact.email}`} className="btn" style={{ background: "var(--peach)", color: "var(--charcoal)" }}>{tr(SITE_UI.email)}</a>
             </div>
           </div>
         </section>

@@ -45,7 +45,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 and 0014 in `supabase/migrations` are already applied
+   Migrations 0001–0011, 0014 and 0015 in `supabase/migrations` are already applied
    (0012 QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
@@ -71,7 +71,8 @@ No server to run.
 
 A copy of thekitelc.com (the Wix site) lives at `/site`, built from
 `lib/site/content.ts` (pages made of a few kinds of sections) and the photos in
-`public/site`. It needs no sign-in and is English-only.
+`public/site`. It needs no sign-in. It's in English, and in Farsi, Dari,
+Pashto and Arabic once translation is on (below).
 
 Managers edit it from the 🌐 Website tile (`/admin/website`): the banner across
 the top of every page (with an optional last day after which it hides itself),
@@ -85,6 +86,33 @@ To serve it at a domain's root, set `SITE_HOSTS` (e.g.
 `thekitelc.com,www.thekitelc.com`) and `STAFF_URL` (e.g.
 `https://staff.thekitelc.com`) in Vercel; the middleware then maps
 `thekitelc.com/preschool` to `/site/preschool`, so the Wix URLs keep working.
+
+### Website translation (off until an API key is added)
+
+The site can be read in the staff app's other languages at `/fa/…`, `/prs/…`,
+`/ps/…` and `/ar/…` (e.g. `/site/fa/preschool`), right to left, with a language
+picker across the top. Translations are stored one string at a time in
+`site_strings` (`lib/site/strings.ts` finds the strings; names, links and photos
+aren't translated). When a manager saves English text, any string without a
+translation is sent to Claude (`lib/site/translate.ts`) and stored, so visitors
+never wait on it. Changed English is a new string and gets a new translation;
+anything not translated yet shows in English. On a page's editor, the
+language tabs show each string's translation to check and correct; a
+manager's correction is never overwritten by a machine translation.
+
+To turn it on:
+1. Create an API key at console.anthropic.com (Settings → API keys) and add
+   billing there.
+2. In Vercel → `timeclock` → Settings → Environment Variables, add
+   `ANTHROPIC_API_KEY` with the key, then redeploy.
+3. On the Website page, press **Translate the whole site** (repeat if it says
+   some are left). The whole site is about 180 strings, roughly 14,000
+   characters, into four languages; after that, only new or changed text is
+   translated when it's saved.
+4. Ask a native speaker to read through each language on the page editors.
+
+Without the key there's no picker, nothing is translated, and the editors
+don't show language tabs.
 
 ## QuickBooks (off)
 

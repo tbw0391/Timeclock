@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { KIOSK_COOKIE } from "@/lib/kiosk";
-import { SITE_BASE_HEADER } from "@/lib/site/base";
+import { SITE_BASE_HEADER, SITE_LANG_HEADER, SITE_PATH_HEADER, splitLang } from "@/lib/site/base";
 
 // The icons and manifest must load before sign-in so phones can install the app.
 // /kiosk runs signed out; its device cookie is checked by the database.
@@ -11,19 +11,33 @@ const PUBLIC_PATHS = ["/login", "/auth/", "/brand/", "/manifest.webmanifest", "/
 // Elsewhere the site is at /site.
 const SITE_HOSTS = (process.env.SITE_HOSTS ?? "").split(",").map((h) => h.trim().toLowerCase()).filter(Boolean);
 
+// Serves a website page: path is the part after where the site lives, maybe
+// starting with a language ("/fa/preschool").
+function sitePage(request: NextRequest, root: string, path: string) {
+  const { lang, rest } = splitLang(path);
+  const url = request.nextUrl.clone();
+  url.pathname = "/site" + (rest === "/" ? "" : rest);
+  const headers = new Headers(request.headers);
+  headers.set(SITE_BASE_HEADER, root);
+  headers.set(SITE_PATH_HEADER, rest);
+  if (lang) headers.set(SITE_LANG_HEADER, lang);
+  else headers.delete(SITE_LANG_HEADER);
+  return NextResponse.rewrite(url, { request: { headers } });
+}
+
 export async function updateSession(request: NextRequest) {
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
   const path0 = request.nextUrl.pathname;
   // The public website never needs a session, so skip the auth round trip.
   if (SITE_HOSTS.includes(host)) {
     if (path0.startsWith("/site/") || path0.startsWith("/brand/")) return NextResponse.next();
-    const url = request.nextUrl.clone();
-    url.pathname = "/site" + (path0 === "/" ? "" : path0);
-    const headers = new Headers(request.headers);
-    headers.set(SITE_BASE_HEADER, "");
-    return NextResponse.rewrite(url, { request: { headers } });
+    return sitePage(request, "", path0);
   }
-  if (path0 === "/site" || path0.startsWith("/site/")) return NextResponse.next();
+  if (path0 === "/site" || path0.startsWith("/site/")) {
+    // Photos (public/site/*.webp) are files, not pages.
+    if (/\.\w+$/.test(path0)) return NextResponse.next();
+    return sitePage(request, "/site", path0.slice(5) || "/");
+  }
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(

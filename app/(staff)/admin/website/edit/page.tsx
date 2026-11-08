@@ -4,12 +4,18 @@ import { requireAdmin } from "@/lib/session";
 import { getT } from "@/lib/i18n/server";
 import type { MessageKey } from "@/lib/i18n/messages";
 import type { Button, Section } from "@/lib/site/content";
-import { editedPages, sitePage } from "@/lib/site/server";
-import { savePage } from "../../actions";
+import { LOCALES } from "@/lib/i18n/locales";
+import { SITE_LANGS, isSiteLang } from "@/lib/site/base";
+import { editedPages, sitePage, translations } from "@/lib/site/server";
+import { pageStrings } from "@/lib/site/strings";
+import { translateOn } from "@/lib/site/translate";
+import { savePage, saveTranslations } from "../actions";
 
-type Props = { searchParams: Promise<{ page?: string; error?: string; ok?: string }> };
+type Props = { searchParams: Promise<{ page?: string; lang?: string; error?: string; ok?: string }> };
 
 export const dynamic = "force-dynamic";
+// Saving translates any new words.
+export const maxDuration = 300;
 
 // One field. The website is in English, so what's typed is left-to-right.
 function Field({ name, label, value, long, required }: { name: string; label: string; value?: string; long?: boolean; required?: boolean }) {
@@ -26,9 +32,11 @@ function Field({ name, label, value, long, required }: { name: string; label: st
   );
 }
 
-// Website editor for one page: every word and link on it, section by section.
+// Website editor for one page: every word and link on it, section by section,
+// or with ?lang= its translation, string by string.
 export default async function EditPage({ searchParams }: Props) {
-  const { page: slug = "", error, ok } = await searchParams;
+  const { page: slug = "", lang: langParam, error, ok } = await searchParams;
+  const lang = translateOn() && isSiteLang(langParam) ? langParam : null;
   const { profile, settings } = await requireAdmin();
   const { t } = await getT();
   const [page, edited] = await Promise.all([sitePage(slug), editedPages()]);
@@ -105,7 +113,38 @@ export default async function EditPage({ searchParams }: Props) {
     }
   }
 
-  const view = `/site${slug ? `/${slug}` : ""}`;
+  // Each English string on the page over a box for its translation.
+  async function translationForm(l: (typeof SITE_LANGS)[number]) {
+    const have = await translations(l);
+    const strings = pageStrings(page!);
+    const { dir } = LOCALES[l];
+    return (
+      <form action={saveTranslations} className="max-w-2xl space-y-4">
+        <input type="hidden" name="slug" value={slug} />
+        <input type="hidden" name="lang" value={l} />
+        <p className="muted text-sm">{t("site.trHint")}</p>
+        {strings.map((en, i) => {
+          const row = have.get(en);
+          return (
+            <div key={i} className="card space-y-2">
+              <p dir="ltr" lang="en" className="muted whitespace-pre-line text-sm">{en}</p>
+              <input type="hidden" name={`en${i}`} value={en} />
+              <input type="hidden" name={`was${i}`} value={row?.tr ?? ""} />
+              <textarea name={`tr${i}`} dir={dir} lang={l} rows={Math.min(14, Math.max(2, Math.ceil(en.length / 45) + en.split("\n").length))}
+                defaultValue={row?.tr ?? ""} placeholder={t("site.trMissing")} className="input" />
+              {row?.edited && <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">{t("site.trEdited")}</span>}
+            </div>
+          );
+        })}
+        <div className="sticky bottom-0 -mx-4 border-t-2 px-4 py-3" style={{ background: "var(--bg)", borderColor: "var(--soft-line)" }}>
+          <button className="btn">{t("common.save")}</button>
+        </div>
+      </form>
+    );
+  }
+
+  const view = `/site${lang ? `/${lang}` : ""}${slug ? `/${slug}` : ""}`;
+  const tab = (l: string | null) => `/admin/website/edit?page=${encodeURIComponent(slug)}${l ? `&lang=${l}` : ""}`;
   return (
     <>
       <Header profile={profile} settings={settings} />
@@ -113,6 +152,14 @@ export default async function EditPage({ searchParams }: Props) {
       <p className="mb-2 text-sm"><a href="/admin/website" className="underline">{t("site.back")}</a></p>
       <h1 className="mb-1 text-2xl font-bold" dir="ltr">{slug ? page.title : "Home"}</h1>
       <p className="mb-4 text-sm"><a href={view} target="_blank" rel="noopener" className="underline">{t("site.viewPage")}</a></p>
+      {translateOn() && (
+        <nav className="mb-4 flex flex-wrap gap-2">
+          {[null, ...SITE_LANGS].map((l) => (
+            <a key={l ?? "en"} href={tab(l)} lang={l ?? "en"} className={l === lang ? "btn" : "btn-ghost"}>{LOCALES[l ?? "en"].name}</a>
+          ))}
+        </nav>
+      )}
+      {lang ? await translationForm(lang) : <>
       <form action={savePage} className="max-w-2xl space-y-4">
         <input type="hidden" name="slug" value={slug} />
         {page.sections.map((s, i) => (
@@ -132,6 +179,7 @@ export default async function EditPage({ searchParams }: Props) {
           <button name="reset" value="1" className="btn-ghost">{t("site.reset")}</button>
         </form>
       )}
+      </>}
     </>
   );
 }

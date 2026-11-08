@@ -2,16 +2,20 @@ import { Flash, Header } from "@/components/ui";
 import { requireAdmin } from "@/lib/session";
 import { getT } from "@/lib/i18n/server";
 import { PAGES } from "@/lib/site/content";
-import { editedPages, siteContact } from "@/lib/site/server";
-import { saveContact, saveNotice } from "../actions";
+import { allSiteStrings, editedPages, siteContact, untranslatedCount } from "@/lib/site/server";
+import { translateOn } from "@/lib/site/translate";
+import { saveContact, saveNotice, translateSite } from "./actions";
 
 type Notice = { text: string; until: string | null };
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
 
 export const dynamic = "force-dynamic";
+// Saving translates new words, and "Translate the whole site" can take a while.
+export const maxDuration = 300;
 
 // Website editor: the banner across the top, each page's words, and the
-// contact details. Photos come later.
+// contact details, plus translations into the staff app's other languages.
+// Photos come later.
 export default async function WebsitePage({ searchParams }: Props) {
   const { error, ok } = await searchParams;
   const { supabase, profile, settings } = await requireAdmin();
@@ -22,6 +26,7 @@ export default async function WebsitePage({ searchParams }: Props) {
     editedPages(),
     siteContact(),
   ]);
+  const missing = translateOn() ? await untranslatedCount(await allSiteStrings()) : 0;
   const notice = row?.value ?? { text: "", until: null };
 
   return (
@@ -71,7 +76,7 @@ export default async function WebsitePage({ searchParams }: Props) {
         </ul>
       </section>
 
-      <section className="card max-w-lg">
+      <section className="card mb-6 max-w-lg">
         <h2 className="mb-1 font-semibold">{t("site.contact")}</h2>
         <p className="muted mb-3 text-sm">{t("site.contactHint")}</p>
         <form action={saveContact} className="space-y-3">
@@ -94,6 +99,23 @@ export default async function WebsitePage({ searchParams }: Props) {
           </label>
           <button className="btn">{t("common.save")}</button>
         </form>
+      </section>
+      <section className="card max-w-lg">
+        <h2 className="mb-1 font-semibold">{t("site.translate")}</h2>
+        {translateOn() ? (
+          <>
+            <p className="muted mb-3 text-sm">{t("site.translateHint")}</p>
+            <p className="mb-3 font-semibold">{missing ? t("site.translateMissing", { count: missing }) : t("site.translateAllDone")}</p>
+            {missing > 0 && (
+              <form action={translateSite}>
+                <button className="btn">{t("site.translateAll")}</button>
+                <p className="muted mt-2 text-sm">{t("site.translateSlow")}</p>
+              </form>
+            )}
+          </>
+        ) : (
+          <p className="muted text-sm">{t("site.translateOff")}</p>
+        )}
       </section>
       <p className="mt-4 text-sm">
         <a href="/site" target="_blank" rel="noopener" className="underline">{t("site.view")}</a>

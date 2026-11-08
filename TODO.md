@@ -2,8 +2,7 @@
 
 ## Now
 - [ ] Try the 🌐 Website tile on a phone: the banner, a page's words (e.g. Preschool prices
-      and calendar) and the contact details. The page editor (Nov 7) isn't committed yet;
-      its database change (0014) is applied.
+      and calendar) and the contact details.
 - [ ] **Vercel login wall** (Todd): Vercel → `timeclock` → Settings → Deployment Protection. If
       "Vercel Authentication" covers all deployments, switch to Standard Protection so staff
       (and later the public) aren't asked to log in to Vercel. Then check
@@ -15,6 +14,8 @@
   - [ ] contact form that saves messages in the app (replaces the Wix forms)
 
 ## Waiting on Todd
+- [ ] Anthropic API key for website translation: README → Public website → Website translation.
+      Then press "Translate the whole site" and have a native speaker read each language
 - [ ] Gusto approval for the live connection (Developer Portal app, `time_sheet:write`); then the
       turn-on steps in README → Gusto, trying Gusto's demo site first
 - [ ] New-family forms for the iPad paperwork (put them in `../forms/`, outside git)
