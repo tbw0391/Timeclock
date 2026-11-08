@@ -21,7 +21,7 @@ export default async function Hub() {
   const { t, intl } = await getT();
   const admin = profile.role === "admin" && profile.active;
   const today = todayIn(settings.timezone);
-  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }, { count: newMessages }, { data: announcements }, { data: reads }, { data: certs }] = await Promise.all([
+  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }, { count: newMessages }, { data: announcements }, { data: reads }, { data: certs }, { count: offPending }, { count: myOffPending }] = await Promise.all([
     supabase.from("punches").select("*").eq("user_id", profile.id).is("clock_out", null).maybeSingle<Punch>(),
     admin
       ? supabase.from("suggestions").select("id", { count: "exact", head: true }).eq("status", "new")
@@ -35,6 +35,10 @@ export default async function Hub() {
     supabase.from("announcement_reads").select("announcement_id").eq("user_id", profile.id).returns<{ announcement_id: number }[]>(),
     // Managers can read everyone's; the hub counts all of them for the tile.
     supabase.from("certifications").select("id, user_id, kind, expires_on, note").returns<Cert[]>(),
+    admin
+      ? supabase.from("time_off").select("id", { count: "exact", head: true }).eq("status", "pending")
+      : Promise.resolve({ count: 0 }),
+    supabase.from("time_off").select("id", { count: "exact", head: true }).eq("status", "pending").eq("user_id", profile.id),
   ]);
   const seen = new Set((reads ?? []).map((r) => r.announcement_id));
   const unread = (announcements ?? []).filter((a) => !seen.has(a.id));
@@ -48,6 +52,7 @@ export default async function Hub() {
       desc: open ? t("tile.timeclock.onClock", { time: timeLabel(open.clock_in, settings.timezone, intl) }) : t("tile.timeclock.offClock"),
     },
     { href: "/children", icon: "🧒", title: t("tile.children"), desc: t("tile.children.desc", { here: kidsHere ?? 0, total: kidsTotal ?? 0 }) },
+    { href: "/time-off", icon: "🌴", title: t("tile.timeOff"), desc: myOffPending ? t("tile.timeOff.waiting", { count: myOffPending }) : t("tile.timeOff.desc") },
     { href: "/suggest", icon: "💡", title: t("tile.suggest"), desc: t("tile.suggest.desc") },
     { href: "/account", icon: "🙂", title: t("tile.account"), desc: t("tile.account.desc") },
   ];
@@ -55,6 +60,7 @@ export default async function Hub() {
     { href: "/admin", icon: "👥", title: t("tile.crew"), desc: t("tile.crew.desc") },
     { href: "/admin/timesheets", icon: "📋", title: t("tile.timesheets"), desc: t("tile.timesheets.desc") },
     ...(gustoOn() ? [{ href: "/admin/gusto", icon: "🔗", title: t("tile.gusto"), desc: t("tile.gusto.desc") }] : []),
+    { href: "/admin/time-off", icon: "🌴", title: t("tile.timeOffAdmin"), desc: t("tile.timeOffAdmin.desc", { count: offPending ?? 0 }) },
     { href: "/admin/announcements", icon: "📣", title: t("tile.announcements"), desc: t("tile.announcements.desc") },
     { href: "/admin/certifications", icon: "🎓", title: t("tile.certs"), desc: due.length ? t("tile.certs.due", { count: due.length }) : t("tile.certs.ok") },
     { href: "/admin/website", icon: "🌐", title: t("tile.website"), desc: t("tile.website.desc") },

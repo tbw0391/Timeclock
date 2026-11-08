@@ -34,7 +34,7 @@
 
 ## Later hub features
 - [x] Announcements + certifications (Nov 7); enter everyone's certifications under 🎓
-- [ ] Time-off requests
+- [x] Time-off requests (Nov 7)
 - [ ] Staff schedule
 
 ## Housekeeping

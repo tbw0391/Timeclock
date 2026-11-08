@@ -45,7 +45,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 and 0014–0019 in `supabase/migrations` are already applied
+   Migrations 0001–0011 and 0014–0020 in `supabase/migrations` are already applied
    (0012 QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
@@ -78,6 +78,14 @@ checks and anything else with an expiry date, per person. The page lists what's
 expired or due within 60 days (`lib/certifications.ts`); the hub tile shows the
 count. Staff see their own on the Account page, and a warning on the hub when
 one of theirs is due.
+
+## Time off
+
+🌴 Staff ask for days off at `/time-off` (first and last day, a reason, a note);
+sick days can be put in up to 30 days afterwards. Managers approve or decline at
+`/admin/time-off`, with an optional note back, and see who's already off on the
+same days and who's off in the next 30 days. Staff can cancel a request until
+its first day.
 
 ## Public website
 
