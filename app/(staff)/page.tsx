@@ -16,13 +16,16 @@ export default async function Hub() {
   const { supabase, profile, settings } = await getSession();
   const { t, intl } = await getT();
   const admin = profile.role === "admin" && profile.active;
-  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }] = await Promise.all([
+  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }, { count: newMessages }] = await Promise.all([
     supabase.from("punches").select("*").eq("user_id", profile.id).is("clock_out", null).maybeSingle<Punch>(),
     admin
       ? supabase.from("suggestions").select("id", { count: "exact", head: true }).eq("status", "new")
       : Promise.resolve({ count: 0 }),
     supabase.from("children").select("id", { count: "exact", head: true }).eq("active", true),
     supabase.from("child_attendance").select("id", { count: "exact", head: true }).is("checked_out_at", null),
+    admin
+      ? supabase.from("site_messages").select("id", { count: "exact", head: true }).eq("status", "new")
+      : Promise.resolve({ count: 0 }),
   ]);
 
   const staff: Tile[] = [
@@ -39,6 +42,7 @@ export default async function Hub() {
     { href: "/admin/timesheets", icon: "📋", title: t("tile.timesheets"), desc: t("tile.timesheets.desc") },
     ...(gustoOn() ? [{ href: "/admin/gusto", icon: "🔗", title: t("tile.gusto"), desc: t("tile.gusto.desc") }] : []),
     { href: "/admin/website", icon: "🌐", title: t("tile.website"), desc: t("tile.website.desc") },
+    { href: "/admin/website/messages", icon: "✉️", title: t("tile.messages"), desc: t("tile.messages.desc", { count: newMessages ?? 0 }) },
     { href: "/admin/suggestions", icon: "📬", title: t("tile.suggestions"), desc: t("tile.suggestions.desc", { count: newSuggestions ?? 0 }) },
     { href: "/admin/audit", icon: "📝", title: t("tile.audit"), desc: t("tile.audit.desc") },
   ] : [];

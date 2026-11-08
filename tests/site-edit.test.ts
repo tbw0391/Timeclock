@@ -25,6 +25,20 @@ describe("website page editor", () => {
     expect(s0.buttons![0]).toEqual({ label: "Sign up", href: (preschool.sections[0] as typeof s0).buttons![0].href });
   });
 
+  it("changes, removes and reorders photos, ignoring anything that isn't a photo name", () => {
+    const up = "up/0b8f6a1e-3c2d-4e5f-8a9b-0c1d2e3f4a5b.jpg";
+    const home = pageFor("")!;
+    const out = sectionsFrom(form({ "s0.image": up, "s1.image": "", "s2.i0.image": "../../etc/passwd" }), home.sections);
+    expect(out[0]).toMatchObject({ kind: "hero", image: up });
+    expect(out[1]).toMatchObject({ kind: "text", image: undefined }); // optional: removed
+    expect(out[2]).toMatchObject({ kind: "tiles" });
+    expect((out[2] as { items: { image: string }[] }).items[0].image).toBe((home.sections[2] as { items: { image: string }[] }).items[0].image);
+
+    const photos = pageFor("photos")!;
+    const g = sectionsFrom(form({ "s0.images": `2f58b87d, ${up},nope,423ce123` }), photos.sections)[0];
+    expect(g).toMatchObject({ kind: "gallery", images: ["2f58b87d", up, "423ce123"] });
+  });
+
   it("uses saved edits only while the page has the same kinds of sections", () => {
     const edited = sectionsFrom(form({ "s0.body": "Changed." }), preschool.sections);
     expect(withEdits(preschool, { sections: edited }).sections[0]).toMatchObject({ body: "Changed." });

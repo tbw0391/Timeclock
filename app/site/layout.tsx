@@ -85,11 +85,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
           <div>
             <p className="font-bold">{SITE.name}</p>
-            <p>{contact.address[0]}<br />{contact.address[1]}</p>
+            <p dir="ltr" className="inline-block">{contact.address[0]}<br />{contact.address[1]}</p>
           </div>
           <div>
-            <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="block font-semibold" style={{ color: "#7a4fb0" }}>{contact.phone}</a>
-            <a href={`mailto:${contact.email}`} className="block font-semibold" style={{ color: "#7a4fb0" }}>{contact.email}</a>
+            <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="block font-semibold" style={{ color: "#7a4fb0" }}><bdi dir="ltr">{contact.phone}</bdi></a>
+            <a href={`mailto:${contact.email}`} className="block font-semibold" style={{ color: "#7a4fb0" }}><bdi dir="ltr">{contact.email}</bdi></a>
             <div className="mt-2 flex gap-4">
               <a href={SITE.instagram} target="_blank" rel="noopener" style={{ color: "#7a4fb0" }}>Instagram</a>
               <a href={SITE.facebook} target="_blank" rel="noopener" style={{ color: "#7a4fb0" }}>Facebook</a>

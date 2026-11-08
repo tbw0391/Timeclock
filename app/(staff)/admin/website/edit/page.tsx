@@ -9,7 +9,8 @@ import { SITE_LANGS, isSiteLang } from "@/lib/site/base";
 import { editedPages, sitePage, translations } from "@/lib/site/server";
 import { pageStrings } from "@/lib/site/strings";
 import { translateOn } from "@/lib/site/translate";
-import { savePage, saveTranslations } from "../actions";
+import { GalleryPicker, PhotoPicker, type PhotoLabels } from "@/components/PhotoPicker";
+import { savePage, saveTranslations, uploadSitePhoto } from "../actions";
 
 type Props = { searchParams: Promise<{ page?: string; lang?: string; error?: string; ok?: string }> };
 
@@ -42,6 +43,13 @@ export default async function EditPage({ searchParams }: Props) {
   const [page, edited] = await Promise.all([sitePage(slug), editedPages()]);
   if (!page) notFound();
 
+  const labels: PhotoLabels = {
+    change: t("site.photo.change"), add: t("site.photo.add"), addMany: t("site.photo.addMany"), remove: t("site.photo.remove"),
+    left: t("site.photo.left"), right: t("site.photo.right"), uploading: t("site.photo.uploading"), badType: t("site.photo.badType"), none: t("site.photo.none"),
+  };
+  const pic = (name: string, value?: string, optional?: boolean) =>
+    <PhotoPicker name={name} value={value} optional={optional} upload={uploadSitePhoto} labels={labels} />;
+
   const buttons = (p: string, list?: Button[]) => list?.map((b, j) => (
     <div key={j} className="grid gap-2 rounded-xl border-2 p-3 sm:grid-cols-2" style={{ borderColor: "var(--soft-line)" }}>
       <Field name={`${p}.b${j}.label`} label={t("site.f.button")} value={b.label} required />
@@ -56,9 +64,9 @@ export default async function EditPage({ searchParams }: Props) {
     const p = `s${i}`;
     switch (s.kind) {
       case "hero":
-        return <><Field name={`${p}.title`} label={t("site.f.title")} value={s.title} long required /><Field name={`${p}.text`} label={t("site.f.text")} value={s.text} long />{buttons(p, s.buttons)}</>;
+        return <>{pic(`${p}.image`, s.image)}<Field name={`${p}.title`} label={t("site.f.title")} value={s.title} long required /><Field name={`${p}.text`} label={t("site.f.text")} value={s.text} long />{buttons(p, s.buttons)}</>;
       case "text":
-        return <><Field name={`${p}.title`} label={t("site.f.title")} value={s.title} /><Field name={`${p}.body`} label={t("site.f.body")} value={s.body} long required />{buttons(p, s.buttons)}</>;
+        return <><Field name={`${p}.title`} label={t("site.f.title")} value={s.title} /><Field name={`${p}.body`} label={t("site.f.body")} value={s.body} long required />{pic(`${p}.image`, s.image, true)}{buttons(p, s.buttons)}</>;
       case "list":
         return (
           <>
@@ -75,6 +83,7 @@ export default async function EditPage({ searchParams }: Props) {
           <>
             <Field name={`${p}.title`} label={t("site.f.title")} value={s.title} />
             <Field name={`${p}.intro`} label={t("site.f.intro")} value={s.intro} />
+            {pic(`${p}.image`, s.image, true)}
             {s.items.map((c, j) => (
               <div key={j} className="space-y-2 border-s-4 ps-3" style={{ borderColor: "var(--soft-line)" }}>
                 <Field name={`${p}.i${j}.title`} label={`${t("site.f.title")} ${j + 1}`} value={c.title} required />
@@ -88,7 +97,12 @@ export default async function EditPage({ searchParams }: Props) {
         return (
           <>
             <Field name={`${p}.title`} label={t("site.f.title")} value={s.title} />
-            {s.items.map((x, j) => <Field key={j} name={`${p}.i${j}.caption`} label={`${t("site.f.caption")} ${j + 1}`} value={x.caption} required />)}
+            {s.items.map((x, j) => (
+              <div key={j} className="space-y-2 border-s-4 ps-3" style={{ borderColor: "var(--soft-line)" }}>
+                {pic(`${p}.i${j}.image`, x.image)}
+                <Field name={`${p}.i${j}.caption`} label={`${t("site.f.caption")} ${j + 1}`} value={x.caption} required />
+              </div>
+            ))}
           </>
         );
       case "people":
@@ -97,6 +111,7 @@ export default async function EditPage({ searchParams }: Props) {
             <Field name={`${p}.title`} label={t("site.f.title")} value={s.title} />
             {s.items.map((m, j) => (
               <div key={j} className="space-y-2 border-s-4 ps-3" style={{ borderColor: "var(--soft-line)" }}>
+                {pic(`${p}.i${j}.image`, m.image)}
                 <Field name={`${p}.i${j}.name`} label={t("site.f.name")} value={m.name} required />
                 {m.role !== undefined && <Field name={`${p}.i${j}.role`} label={t("site.f.role")} value={m.role} />}
                 {m.bio !== undefined && <Field name={`${p}.i${j}.bio`} label={t("site.f.bio")} value={m.bio} long />}
@@ -105,11 +120,19 @@ export default async function EditPage({ searchParams }: Props) {
           </>
         );
       case "gallery":
-        return <Field name={`${p}.title`} label={t("site.f.title")} value={s.title} />;
+        return <><Field name={`${p}.title`} label={t("site.f.title")} value={s.title} /><GalleryPicker name={`${p}.images`} value={s.images} upload={uploadSitePhoto} labels={labels} /></>;
       case "buttons":
         return buttons(p, s.buttons);
       case "contact":
         return <><Field name={`${p}.title`} label={t("site.f.title")} value={s.title} /><Field name={`${p}.text`} label={t("site.f.text")} value={s.text} /><p className="muted text-sm">{t("site.contactBox")}</p></>;
+      case "events":
+        return (
+          <>
+            <Field name={`${p}.title`} label={t("site.f.title")} value={s.title} required />
+            <Field name={`${p}.empty`} label={t("site.f.empty")} value={s.empty} required />
+            <p className="muted text-sm">{t("site.eventsWhere")} <a href="/admin/website" className="underline">{t("site.back")}</a></p>
+          </>
+        );
     }
   }
 
@@ -162,6 +185,7 @@ export default async function EditPage({ searchParams }: Props) {
       {lang ? await translationForm(lang) : <>
       <form action={savePage} className="max-w-2xl space-y-4">
         <input type="hidden" name="slug" value={slug} />
+        <p className="rounded-xl px-3 py-2 text-sm" style={{ background: "var(--bow)", color: "var(--charcoal)" }}>📷 {t("site.photo.consent")}</p>
         {page.sections.map((s, i) => (
           <section key={i} className="card space-y-3">
             <h2 className="muted text-sm font-semibold">{i + 1}. {t(`site.kind.${s.kind}` as MessageKey)}</h2>

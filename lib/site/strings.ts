@@ -35,6 +35,8 @@ export function mapSection(s: Section, tr: Tr): Section {
       return { ...s, buttons: buttons(s.buttons, tr)! };
     case "contact":
       return { ...s, title: opt(s.title, tr), text: opt(s.text, tr) };
+    case "events":
+      return { ...s, title: tr(s.title), empty: tr(s.empty) };
   }
 }
 
@@ -64,6 +66,14 @@ export const SITE_UI = {
   email: "Email",
   staff: "Staff sign-in",
   language: "Language",
+  formTitle: "Send us a message",
+  formName: "Your name",
+  formReplyTo: "Phone number or email",
+  formMessage: "Message",
+  formSend: "Send",
+  formSending: "Sending…",
+  formSent: "Thank you! We'll get back to you soon.",
+  formFailed: "Sorry, that didn't send. Please call or email us instead.",
 };
 
 export const frameStrings = () =>

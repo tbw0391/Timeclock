@@ -2,9 +2,10 @@ import { Flash, Header } from "@/components/ui";
 import { requireAdmin } from "@/lib/session";
 import { getT } from "@/lib/i18n/server";
 import { PAGES } from "@/lib/site/content";
-import { allSiteStrings, editedPages, siteContact, untranslatedCount } from "@/lib/site/server";
+import { allSiteStrings, editedPages, siteContact, siteEvents, untranslatedCount } from "@/lib/site/server";
+import { eventDate } from "@/lib/site/events";
 import { translateOn } from "@/lib/site/translate";
-import { saveContact, saveNotice, translateSite } from "./actions";
+import { addEvent, removeEvent, saveContact, saveNotice, translateSite } from "./actions";
 
 type Notice = { text: string; until: string | null };
 type Props = { searchParams: Promise<{ error?: string; ok?: string }> };
@@ -19,13 +20,15 @@ export const maxDuration = 300;
 export default async function WebsitePage({ searchParams }: Props) {
   const { error, ok } = await searchParams;
   const { supabase, profile, settings } = await requireAdmin();
-  const { t } = await getT();
-  const [{ data: row }, { data: showing }, edited, contact] = await Promise.all([
+  const { t, intl } = await getT();
+  const [{ data: row }, { data: showing }, edited, contact, events] = await Promise.all([
     supabase.from("site_content").select("value").eq("key", "notice").maybeSingle<{ value: Notice }>(),
     supabase.rpc("site_notice"),
     editedPages(),
     siteContact(),
+    siteEvents(),
   ]);
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: settings.timezone });
   const missing = translateOn() ? await untranslatedCount(await allSiteStrings()) : 0;
   const notice = row?.value ?? { text: "", until: null };
 
@@ -77,6 +80,46 @@ export default async function WebsitePage({ searchParams }: Props) {
       </section>
 
       <section className="card mb-6 max-w-lg">
+        <h2 className="mb-1 font-semibold">{t("site.events")}</h2>
+        <p className="muted mb-3 text-sm">{t("site.eventsHint")}</p>
+        {events.length ? (
+          <ul className="mb-4 divide-y">
+            {events.map((e) => (
+              <li key={e.date + e.title} className="flex items-start justify-between gap-3 py-2.5">
+                <div dir="ltr">
+                  <p className="text-sm font-semibold">{eventDate(e.date, intl)}</p>
+                  <p>{e.title}</p>
+                  {e.details && <p className="muted whitespace-pre-line text-sm">{e.details}</p>}
+                </div>
+                <form action={removeEvent}>
+                  <input type="hidden" name="date" value={e.date} />
+                  <input type="hidden" name="title" value={e.title} />
+                  <button className="btn-ghost">{t("site.photo.remove")}</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted mb-4 text-sm">{t("site.eventsNone")}</p>
+        )}
+        <form action={addEvent} className="space-y-3">
+          <label className="block text-sm">
+            {t("site.eventDate")}
+            <input type="date" name="date" required min={today} className="input mt-1" />
+          </label>
+          <label className="block text-sm">
+            {t("site.eventTitle")}
+            <input name="title" dir="ltr" required maxLength={150} placeholder="Community Day" className="input mt-1" />
+          </label>
+          <label className="block text-sm">
+            {t("site.eventDetails")}
+            <textarea name="details" dir="ltr" rows={3} maxLength={1500} className="input mt-1" />
+          </label>
+          <button className="btn">{t("site.eventAdd")}</button>
+        </form>
+      </section>
+
+      <section className="card mb-6 max-w-lg">
         <h2 className="mb-1 font-semibold">{t("site.contact")}</h2>
         <p className="muted mb-3 text-sm">{t("site.contactHint")}</p>
         <form action={saveContact} className="space-y-3">
@@ -119,6 +162,8 @@ export default async function WebsitePage({ searchParams }: Props) {
       </section>
       <p className="mt-4 text-sm">
         <a href="/site" target="_blank" rel="noopener" className="underline">{t("site.view")}</a>
+        {" · "}
+        <a href="/admin/website/messages" className="underline">{t("tile.messages")}</a>
       </p>
     </>
   );

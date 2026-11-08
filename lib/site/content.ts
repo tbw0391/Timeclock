@@ -40,7 +40,9 @@ export type Section =
   | { kind: "gallery"; title?: string; images: string[] }
   | { kind: "buttons"; buttons: Button[] }
   // Phone, email, address and office hours.
-  | { kind: "contact"; title?: string; text?: string };
+  | { kind: "contact"; title?: string; text?: string }
+  // Upcoming events, added on the Website page; "empty" shows when there are none.
+  | { kind: "events"; title: string; empty: string };
 
 export type Page = { slug: string; title: string; description: string; sections: Section[] };
 
@@ -307,7 +309,7 @@ export const PAGES: Page[] = [
     slug: "upcomingevents",
     title: "Upcoming Events",
     description: "Upcoming events at The KITE Learning Center.",
-    sections: [{ kind: "text", title: "Upcoming Events", body: "No events at the moment." }],
+    sections: [{ kind: "events", title: "Upcoming Events", empty: "No events at the moment. Check back soon!" }],
   },
   {
     slug: "core-beliefs",

@@ -1,8 +1,9 @@
 // Turning the Website page's forms into page content, and stored edits back
 // into pages. Plain functions so tests/site-edit.test.ts can check them.
-// Managers change words and links only; the layout and photos stay as they are.
+// Managers change words, links and photos; the layout stays as it is.
 
 import { CONTACT, type Button, type Contact, type Page, type Section } from "./content";
+import { isPhotoId } from "./photos";
 
 // Form fields are named s<section>.<field>, with s<section>.i<item>.<field> for
 // cards, tiles and people and s<section>.b<button>.<field> for buttons.
@@ -22,6 +23,20 @@ function required(get: Get, name: string, was: string) {
   return get(name)?.trim() || was;
 }
 
+// A photo that has to be there: an unknown or empty name keeps the old one.
+function photo(get: Get, name: string, was: string) {
+  const v = get(name)?.trim();
+  return v && isPhotoId(v) ? v : was;
+}
+
+// A photo that can be taken away: empty removes it.
+function optionalPhoto(get: Get, name: string, was?: string) {
+  const v = get(name);
+  if (v === null) return was;
+  if (!v.trim()) return undefined;
+  return isPhotoId(v.trim()) ? v.trim() : was;
+}
+
 // Line breaks from a textarea, normalized; blank lines between paragraphs stay.
 const clean = (s: string) => s.replace(/\r\n?/g, "\n").replace(/[ \t]+\n/g, "\n").trim();
 
@@ -37,9 +52,9 @@ function sectionFrom(get: Get, s: Section, i: number): Section {
   const body = (was: string) => clean(required(get, `${p}.body`, was));
   switch (s.kind) {
     case "hero":
-      return { ...s, title: required(get, `${p}.title`, s.title), text: optional(get, `${p}.text`, s.text), buttons: buttonsFrom(get, p, s.buttons) };
+      return { ...s, title: required(get, `${p}.title`, s.title), text: optional(get, `${p}.text`, s.text), image: photo(get, `${p}.image`, s.image), buttons: buttonsFrom(get, p, s.buttons) };
     case "text":
-      return { ...s, title: optional(get, `${p}.title`, s.title), body: body(s.body), buttons: buttonsFrom(get, p, s.buttons) };
+      return { ...s, title: optional(get, `${p}.title`, s.title), body: body(s.body), image: optionalPhoto(get, `${p}.image`, s.image), buttons: buttonsFrom(get, p, s.buttons) };
     case "list": {
       const items = get(`${p}.items`);
       return {
@@ -54,6 +69,7 @@ function sectionFrom(get: Get, s: Section, i: number): Section {
         ...s,
         title: optional(get, `${p}.title`, s.title),
         intro: optional(get, `${p}.intro`, s.intro),
+        image: optionalPhoto(get, `${p}.image`, s.image),
         items: s.items.map((c, j) => ({
           ...c,
           title: required(get, `${p}.i${j}.title`, c.title),
@@ -65,7 +81,7 @@ function sectionFrom(get: Get, s: Section, i: number): Section {
       return {
         ...s,
         title: optional(get, `${p}.title`, s.title),
-        items: s.items.map((t, j) => ({ ...t, caption: required(get, `${p}.i${j}.caption`, t.caption) })),
+        items: s.items.map((t, j) => ({ ...t, caption: required(get, `${p}.i${j}.caption`, t.caption), image: photo(get, `${p}.i${j}.image`, t.image) })),
       };
     case "people":
       return {
@@ -73,15 +89,20 @@ function sectionFrom(get: Get, s: Section, i: number): Section {
         title: optional(get, `${p}.title`, s.title),
         items: s.items.map((m, j) => {
           const bio = optional(get, `${p}.i${j}.bio`, m.bio);
-          return { ...m, name: required(get, `${p}.i${j}.name`, m.name), role: optional(get, `${p}.i${j}.role`, m.role), bio: bio && clean(bio) };
+          return { ...m, name: required(get, `${p}.i${j}.name`, m.name), role: optional(get, `${p}.i${j}.role`, m.role), bio: bio && clean(bio), image: photo(get, `${p}.i${j}.image`, m.image) };
         }),
       };
-    case "gallery":
-      return { ...s, title: optional(get, `${p}.title`, s.title) };
+    case "gallery": {
+      // The photos in order, as a comma-separated list.
+      const list = get(`${p}.images`);
+      return { ...s, title: optional(get, `${p}.title`, s.title), images: list === null ? s.images : list.split(",").map((x) => x.trim()).filter(isPhotoId) };
+    }
     case "buttons":
       return { ...s, buttons: buttonsFrom(get, p, s.buttons)! };
     case "contact":
       return { ...s, title: optional(get, `${p}.title`, s.title), text: optional(get, `${p}.text`, s.text) };
+    case "events":
+      return { ...s, title: required(get, `${p}.title`, s.title), empty: required(get, `${p}.empty`, s.empty) };
   }
 }
 

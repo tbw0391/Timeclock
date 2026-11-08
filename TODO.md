@@ -2,7 +2,8 @@
 
 ## Now
 - [ ] Try the 🌐 Website tile on a phone: the banner, a page's words (e.g. Preschool prices
-      and calendar) and the contact details.
+      and calendar), a photo from the camera roll, an event, and the contact details.
+      Send yourself a message from /site/contactus and check ✉️ Website messages.
 - [ ] **Vercel login wall** (Todd): Vercel → `timeclock` → Settings → Deployment Protection. If
       "Vercel Authentication" covers all deployments, switch to Standard Protection so staff
       (and later the public) aren't asked to log in to Vercel. Then check
@@ -10,8 +11,10 @@
 - [ ] **Website editor** (step 2): a 🌐 Website tile for managers to
   - [x] change the top banner ("No school on …")
   - [x] edit page text, prices, the calendar, button links and contact details
-  - [ ] add, reorder and remove photos from a phone (with a photo-permission reminder)
-  - [ ] contact form that saves messages in the app (replaces the Wix forms)
+  - [x] add, reorder and remove photos from a phone (with a photo-permission reminder)
+  - [x] contact form that saves messages in the app (replaces the Wix forms)
+  - [x] upcoming events
+  - [ ] maybe: text or email a manager when a website message comes in
 
 ## Waiting on Todd
 - [ ] Anthropic API key for website translation: README → Public website → Website translation.

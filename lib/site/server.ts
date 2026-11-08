@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SITE_BASE_HEADER, SITE_LANGS, SITE_LANG_HEADER, SITE_PATH_HEADER, isSiteLang, type SiteLang } from "./base";
 import { PAGES, pageFor } from "./content";
 import { contactWithEdits, withEdits } from "./edit";
+import { cleanEvents, eventStrings } from "./events";
 import { frameStrings, pageStrings } from "./strings";
 
 // Where the site lives, without the language.
@@ -45,6 +46,12 @@ export async function siteNotice() {
   return (data as string | null) ?? null;
 }
 
+// Events still to come, soonest first.
+export async function siteEvents() {
+  const { data } = await (await createClient()).rpc("site_events");
+  return cleanEvents(data);
+}
+
 async function saved(key: string) {
   const { data } = await (await createClient()).from("site_content").select("value").eq("key", key).maybeSingle<{ value: unknown }>();
   return data?.value ?? null;
@@ -62,8 +69,8 @@ export async function siteContact() {
 
 // Every English string on the website now, for "Translate the whole site".
 export async function allSiteStrings() {
-  const [pages, notice, contact] = await Promise.all([Promise.all(PAGES.map((p) => sitePage(p.slug))), siteNotice(), siteContact()]);
-  return [...frameStrings(), ...pages.flatMap((p) => pageStrings(p!)), ...(notice ? [notice] : []), contact.hours];
+  const [pages, notice, contact, events] = await Promise.all([Promise.all(PAGES.map((p) => sitePage(p.slug))), siteNotice(), siteContact(), siteEvents()]);
+  return [...frameStrings(), ...pages.flatMap((p) => pageStrings(p!)), ...(notice ? [notice] : []), contact.hours, ...eventStrings(events)];
 }
 
 // One language's translations: English → { tr, edited }.

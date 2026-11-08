@@ -1,14 +1,17 @@
 import { Fragment } from "react";
 import type { Button, Contact, Section } from "@/lib/site/content";
+import { eventDate, type SiteEvent } from "@/lib/site/events";
 import { siteHref } from "@/lib/site/base";
+import { photoUrl } from "@/lib/site/photos";
 import { SITE_UI } from "@/lib/site/strings";
+import { ContactForm } from "./ContactForm";
 
 const COLORS = ["var(--peach)", "var(--lavender)", "var(--mint)", "var(--sky)"];
 
-export const photo = (id: string) => `/site/${id}.webp`;
+export const photo = photoUrl;
 
 function Photo({ id, alt, className }: { id: string; alt: string; className?: string }) {
-  // The photos are already resized webp files, so a plain img is all they need.
+  // The photos are already resized (webp from Wix, JPEG from uploads), so a plain img is all they need.
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={photo(id)} alt={alt} loading="lazy" className={className} />;
 }
@@ -56,7 +59,10 @@ function Heading({ children }: { children: React.ReactNode }) {
   return <h2 className="mb-4 text-3xl font-bold sm:text-4xl">{children}</h2>;
 }
 
-export function SectionView({ section: s, base, index, contact, tr }: { section: Section; base: string; index: number; contact: Contact; tr: (s: string) => string }) {
+export function SectionView({ section: s, base, index, contact, tr, lang, shownAt, events, intl }: {
+  section: Section; base: string; index: number; contact: Contact; tr: (s: string) => string; lang: string; shownAt: number;
+  events: SiteEvent[]; intl: string;
+}) {
   switch (s.kind) {
     case "hero":
       return (
@@ -204,9 +210,9 @@ export function SectionView({ section: s, base, index, contact, tr }: { section:
             {s.title && <Heading>{s.title}</Heading>}
             {s.text && <p className="mb-3 text-lg">{s.text}</p>}
             <p className="text-lg leading-relaxed">
-              <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} className="font-semibold">{contact.phone}</a><br />
-              <a href={`mailto:${contact.email}`} className="font-semibold">{contact.email}</a><br />
-              <a href={`https://maps.google.com/?q=${encodeURIComponent(contact.address.join(", "))}`} target="_blank" rel="noopener">
+              <a href={`tel:+1${contact.phone.replace(/\D/g, "")}`} dir="ltr" className="font-semibold">{contact.phone}</a><br />
+              <a href={`mailto:${contact.email}`} dir="ltr" className="font-semibold">{contact.email}</a><br />
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(contact.address.join(", "))}`} target="_blank" rel="noopener" dir="ltr" className="inline-block">
                 {contact.address[0]}<br />{contact.address[1]}
               </a>
             </p>
@@ -220,6 +226,31 @@ export function SectionView({ section: s, base, index, contact, tr }: { section:
               <a href={`mailto:${contact.email}`} className="btn" style={{ background: "var(--peach)", color: "var(--charcoal)" }}>{tr(SITE_UI.email)}</a>
             </div>
           </div>
+          <div id="message" className="border-t-[3px] border-dashed pt-6 md:col-span-2" style={{ borderColor: "var(--soft-line)" }}>
+            <ContactForm lang={lang} shownAt={shownAt} labels={{
+              title: tr(SITE_UI.formTitle), name: tr(SITE_UI.formName), replyTo: tr(SITE_UI.formReplyTo), message: tr(SITE_UI.formMessage),
+              send: tr(SITE_UI.formSend), sending: tr(SITE_UI.formSending), sent: tr(SITE_UI.formSent), failed: tr(SITE_UI.formFailed),
+            }} />
+          </div>
+        </section>
+      );
+    case "events":
+      return (
+        <section>
+          <Heading>{s.title}</Heading>
+          {events.length ? (
+            <ul className="grid gap-5 md:grid-cols-2">
+              {events.map((e, i) => (
+                <li key={e.date + e.title} className="card" style={{ boxShadow: `6px 6px 0 ${COLORS[i % COLORS.length]}` }}>
+                  <p className="mb-1 font-bold" style={{ color: "#7a4fb0" }}>{eventDate(e.date, intl)}</p>
+                  <h3 className="mb-2 text-2xl font-bold">{e.title}</h3>
+                  {e.details && <Body text={e.details} />}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="card text-lg">{s.empty}</p>
+          )}
         </section>
       );
   }

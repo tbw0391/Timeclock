@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SectionView } from "@/components/site/Sections";
 import { SITE } from "@/lib/site/content";
-import { siteBase, siteContact, sitePage, siteTr } from "@/lib/site/server";
+import { intlLocale } from "@/lib/i18n/locales";
+import { siteBase, siteContact, siteEvents, siteLang, sitePage, siteTr } from "@/lib/site/server";
 import { translatePage } from "@/lib/site/strings";
 
 type Props = { params: Promise<{ slug?: string[] }> };
@@ -25,6 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SitePage({ params }: Props) {
   const page = await find(params);
   if (!page) notFound();
-  const [base, contact, tr] = await Promise.all([siteBase(), siteContact(), siteTr()]);
-  return page.sections.map((s, i) => <SectionView key={i} section={s} base={base} index={i} contact={{ ...contact, hours: tr(contact.hours) }} tr={tr} />);
+  const hasEvents = page.sections.some((s) => s.kind === "events");
+  const [base, contact, tr, lang, events] = await Promise.all([siteBase(), siteContact(), siteTr(), siteLang(), hasEvents ? siteEvents() : []]);
+  const shownAt = Date.now();
+  const shown = events.map((e) => ({ ...e, title: tr(e.title), details: e.details && tr(e.details) }));
+  return page.sections.map((s, i) => (
+    <SectionView key={i} section={s} base={base} index={i} contact={{ ...contact, hours: tr(contact.hours) }} tr={tr} lang={lang ?? "en"} shownAt={shownAt}
+      events={shown} intl={intlLocale(lang ?? "en")} />
+  ));
 }

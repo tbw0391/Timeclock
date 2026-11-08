@@ -45,7 +45,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011, 0014 and 0015 in `supabase/migrations` are already applied
+   Migrations 0001–0011 and 0014–0018 in `supabase/migrations` are already applied
    (0012 QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
@@ -80,7 +80,18 @@ the words, prices, calendar dates and button links on each page, and the
 phone, email, address and office hours. Edits are stored in the `site_content`
 table and laid over `lib/site/content.ts` (`lib/site/edit.ts`); a page with no
 edits, or whose sections in the code have changed kind or number, shows the
-code's version. Photos and layout aren't editable yet.
+code's version. The layout isn't editable.
+
+- **Photos:** managers change, add, remove and reorder photos from their phone.
+  The phone shrinks each one to a JPEG (`components/PhotoPicker.tsx`) and it's
+  stored in the public `site-photos` bucket; pages name it `up/<uuid>.jpg`
+  (`lib/site/photos.ts`). Photos that are replaced stay in the bucket.
+- **Contact form:** every contact box has a "Send us a message" form. Messages
+  go to `site_messages` and show under ✉️ Website messages (a hub tile with the
+  count of new ones). A hidden field, a 3-second minimum and a cap of 30 an hour
+  keep bots out. Nobody is emailed or texted about a new message; check the tile.
+- **Upcoming events:** added on the Website page (date, name, details) and
+  shown on the Upcoming Events page; each drops off after its day.
 
 To serve it at a domain's root, set `SITE_HOSTS` (e.g.
 `thekitelc.com,www.thekitelc.com`) and `STAFF_URL` (e.g.
