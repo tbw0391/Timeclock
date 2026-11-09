@@ -4,10 +4,8 @@
 - [ ] Try the 🌐 Website tile on a phone: the banner, a page's words (e.g. Preschool prices
       and calendar), a photo from the camera roll, an event, and the contact details.
       Send yourself a message from /site/contactus and check ✉️ Website messages.
-- [ ] **Vercel login wall** (Todd): Vercel → `timeclock` → Settings → Deployment Protection. If
-      "Vercel Authentication" covers all deployments, switch to Standard Protection so staff
-      (and later the public) aren't asked to log in to Vercel. Then check
-      https://timeclock-tbw0391.vercel.app/site on a phone.
+- [x] **Vercel login wall** (Nov 8): Standard Protection is on. Use https://timeclock.agatechno.com
+      (open to everyone); the `*.vercel.app` addresses still ask for a Vercel login.
 - [ ] **Website editor** (step 2): a 🌐 Website tile for managers to
   - [x] change the top banner ("No school on …")
   - [x] edit page text, prices, the calendar, button links and contact details
@@ -35,7 +33,8 @@
 ## Later hub features
 - [x] Announcements + certifications (Nov 7); enter everyone's certifications under 🎓
 - [x] Time-off requests (Nov 7)
-- [ ] Staff schedule
+- [x] Staff schedule (Nov 9)
+  - [ ] Plan one real week and check it on a staff phone
 
 ## Housekeeping
 - [ ] Put a name on the 6145988992 admin account

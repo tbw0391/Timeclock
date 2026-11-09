@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Header } from "@/components/ui";
 import { getSession, type Punch } from "@/lib/session";
 import { getT } from "@/lib/i18n/server";
-import { dateLabel, timeLabel, todayIn } from "@/lib/time";
+import { dateLabel, dayLabel, timeLabel, todayIn } from "@/lib/time";
+import { shiftLabel, type Shift } from "@/lib/schedule";
 import { gustoOn } from "@/lib/gusto-sync";
 import { byUrgency, CERT_STYLE, certStatus, type Cert } from "@/lib/certifications";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -21,7 +22,7 @@ export default async function Hub() {
   const { t, intl } = await getT();
   const admin = profile.role === "admin" && profile.active;
   const today = todayIn(settings.timezone);
-  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }, { count: newMessages }, { data: announcements }, { data: reads }, { data: certs }, { count: offPending }, { count: myOffPending }] = await Promise.all([
+  const [{ data: open }, { count: newSuggestions }, { count: kidsTotal }, { count: kidsHere }, { count: newMessages }, { data: announcements }, { data: reads }, { data: certs }, { count: offPending }, { count: myOffPending }, { data: nextShift }] = await Promise.all([
     supabase.from("punches").select("*").eq("user_id", profile.id).is("clock_out", null).maybeSingle<Punch>(),
     admin
       ? supabase.from("suggestions").select("id", { count: "exact", head: true }).eq("status", "new")
@@ -39,6 +40,8 @@ export default async function Hub() {
       ? supabase.from("time_off").select("id", { count: "exact", head: true }).eq("status", "pending")
       : Promise.resolve({ count: 0 }),
     supabase.from("time_off").select("id", { count: "exact", head: true }).eq("status", "pending").eq("user_id", profile.id),
+    supabase.from("shifts").select("id, user_id, day, starts, ends, note").eq("user_id", profile.id).gte("day", today)
+      .order("day").order("starts").limit(1).maybeSingle<Shift>(),
   ]);
   const seen = new Set((reads ?? []).map((r) => r.announcement_id));
   const unread = (announcements ?? []).filter((a) => !seen.has(a.id));
@@ -52,6 +55,10 @@ export default async function Hub() {
       desc: open ? t("tile.timeclock.onClock", { time: timeLabel(open.clock_in, settings.timezone, intl) }) : t("tile.timeclock.offClock"),
     },
     { href: "/children", icon: "🧒", title: t("tile.children"), desc: t("tile.children.desc", { here: kidsHere ?? 0, total: kidsTotal ?? 0 }) },
+    {
+      href: "/schedule", icon: "🗓️", title: t("tile.schedule"),
+      desc: nextShift ? t("tile.schedule.next", { day: dayLabel(nextShift.day, intl), time: shiftLabel(nextShift, intl) }) : t("tile.schedule.none"),
+    },
     { href: "/time-off", icon: "🌴", title: t("tile.timeOff"), desc: myOffPending ? t("tile.timeOff.waiting", { count: myOffPending }) : t("tile.timeOff.desc") },
     { href: "/suggest", icon: "💡", title: t("tile.suggest"), desc: t("tile.suggest.desc") },
     { href: "/account", icon: "🙂", title: t("tile.account"), desc: t("tile.account.desc") },
@@ -60,6 +67,7 @@ export default async function Hub() {
     { href: "/admin", icon: "👥", title: t("tile.crew"), desc: t("tile.crew.desc") },
     { href: "/admin/timesheets", icon: "📋", title: t("tile.timesheets"), desc: t("tile.timesheets.desc") },
     ...(gustoOn() ? [{ href: "/admin/gusto", icon: "🔗", title: t("tile.gusto"), desc: t("tile.gusto.desc") }] : []),
+    { href: "/admin/schedule", icon: "🗓️", title: t("tile.scheduleAdmin"), desc: t("tile.scheduleAdmin.desc") },
     { href: "/admin/time-off", icon: "🌴", title: t("tile.timeOffAdmin"), desc: t("tile.timeOffAdmin.desc", { count: offPending ?? 0 }) },
     { href: "/admin/announcements", icon: "📣", title: t("tile.announcements"), desc: t("tile.announcements.desc") },
     { href: "/admin/certifications", icon: "🎓", title: t("tile.certs"), desc: due.length ? t("tile.certs.due", { count: due.length }) : t("tile.certs.ok") },

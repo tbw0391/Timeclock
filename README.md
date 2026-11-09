@@ -45,7 +45,7 @@ No server to run.
 ## Setup
 
 1. Supabase project: `Timeclock` (`ejoihhozsrrtmunxhvfy`) in AGA Technologies LLC.
-   Migrations 0001–0011 and 0014–0020 in `supabase/migrations` are already applied
+   Migrations 0001–0011 and 0014–0021 in `supabase/migrations` are already applied
    (0012 QuickBooks and 0013 Gusto are off; see below). Don't run them
    again.
 2. Supabase dashboard → Authentication → Sign In / Providers → **Phone**: turn it on
@@ -86,6 +86,16 @@ sick days can be put in up to 30 days afterwards. Managers approve or decline at
 `/admin/time-off`, with an optional note back, and see who's already off on the
 same days and who's off in the next 30 days. Staff can cancel a request until
 its first day.
+
+## Schedule
+
+🗓️ Managers plan shifts a week at a time at `/admin/schedule`: pick a person, a
+day, start and end times and an optional note (e.g. the room). "Copy last week's
+shifts" fills the week from the one before without doubling anything already
+there. The page flags a shift on someone's approved day off, two shifts that
+overlap, and anyone planned past the overtime threshold. Every active staff
+member sees the week at `/schedule` (their own shifts first, then everyone by
+day), and the hub tile shows their next shift. Shifts don't cross midnight.
 
 ## Public website
 
