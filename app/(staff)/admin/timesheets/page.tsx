@@ -3,7 +3,7 @@ import { Flash, GpsTag, Header } from "@/components/ui";
 import { inFix, outFix } from "@/lib/gps";
 import { requireAdmin, type Profile, type Punch } from "@/lib/session";
 import {
-  addDays, dayLabel, hours, isDate, localInput, timeLabel, todayIn, weekStart, weekTotals, type DayRow,
+  addDays, dayLabel, hours, isDate, localInput, personTotals, timeLabel, todayIn, weekStart, weekTotals, type DayRow,
 } from "@/lib/time";
 import { getT } from "@/lib/i18n/server";
 import type { T } from "@/lib/i18n/messages";
@@ -40,8 +40,12 @@ export default async function TimesheetsPage({ searchParams }: Props) {
   });
   const byId = new Map((people ?? []).map((p) => [p.id, p]));
   const name = (id: string) => byId.get(id)?.full_name || byId.get(id)?.phone || "?";
-  const weeks = weekTotals(((days ?? []) as DayRow[]).filter((d) => !user || d.user_id === user),
-    settings.week_starts_on, settings.overtime_hours);
+  const volunteers = new Set((people ?? []).filter((p) => p.role === "volunteer").map((p) => p.id));
+  const allWeeks = weekTotals(((days ?? []) as DayRow[]).filter((d) => !user || d.user_id === user),
+    settings.week_starts_on, settings.overtime_hours, volunteers);
+  const weeks = allWeeks.filter((w) => !volunteers.has(w.user_id));
+  const volunteerTotals = personTotals(allWeeks.filter((w) => volunteers.has(w.user_id)));
+  const volunteerSeconds = volunteerTotals.reduce((n, v) => n + v.seconds, 0);
   const query = new URLSearchParams({ from, to, ...(user ? { user } : {}) });
   const here = `/admin/timesheets?${query}`;
 
@@ -90,6 +94,29 @@ export default async function TimesheetsPage({ searchParams }: Props) {
           {t("ts.weekNote")}
         </p>
       </section>
+
+      {volunteers.size > 0 && (
+        <section className="card mb-6 overflow-x-auto">
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold">{t("ts.volunteers")}</h2>
+            <Link href={`/api/export?${query}&format=volunteers`} className="btn-ghost" prefetch={false}>{t("ts.volunteersDownload")}</Link>
+          </div>
+          <p className="mb-3 text-lg">
+            {t("ts.volunteersTotal", { hours: hours(volunteerSeconds), count: volunteerTotals.length })}
+          </p>
+          {volunteerTotals.length > 0 && (
+            <table className="tbl">
+              <thead><tr><th>{t("common.who")}</th><th>{t("ts.days")}</th><th>{t("common.hours")}</th></tr></thead>
+              <tbody>
+                {volunteerTotals.map((v) => (
+                  <tr key={v.user_id}><td>{v.name}</td><td>{v.days}</td><td className="font-medium">{hours(v.seconds)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <p className="muted mt-2 text-xs">{t("ts.volunteersNote")}</p>
+        </section>
+      )}
 
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-2 font-semibold">{t("ts.punches")}</h2>

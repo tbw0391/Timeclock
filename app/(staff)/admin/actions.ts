@@ -61,7 +61,8 @@ export async function setSuggestionStatus(form: FormData) {
 export async function saveEmployee(form: FormData) {
   const { t, db } = await getT();
   const supabase = await createClient();
-  const role = text(form, "role") === "admin" ? "admin" : "employee";
+  const r = text(form, "role");
+  const role = r === "admin" || r === "volunteer" ? r : "employee";
   const { error } = await supabase.rpc("admin_set_employee", {
     p_user: text(form, "id"),
     p_name: text(form, "full_name"),
@@ -122,13 +123,21 @@ export async function saveSettings(form: FormData) {
 export async function createEmployee(form: FormData) {
   const { t, db } = await getT();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("admin_create_employee", {
+  const { data: person, error } = await supabase.rpc("admin_create_employee", {
     p_name: text(form, "full_name"),
     p_phone: text(form, "phone"),
   });
   if (error) back("/admin", { error: db(error.message) });
+  const volunteer = text(form, "role") === "volunteer";
+  if (volunteer) {
+    const p = person as { id: string; full_name: string; active: boolean };
+    const { error: e2 } = await supabase.rpc("admin_set_employee", {
+      p_user: p.id, p_name: p.full_name, p_role: "volunteer", p_active: p.active,
+    });
+    if (e2) back("/admin", { error: db(e2.message) });
+  }
   revalidatePath("/admin");
-  back("/admin", { ok: t("crew.added") });
+  back("/admin", { ok: t(volunteer ? "crew.addedVolunteer" : "crew.added") });
 }
 
 // QuickBooks card on the Crew page (only shown when QuickBooks is turned on).

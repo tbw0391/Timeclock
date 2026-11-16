@@ -5,11 +5,12 @@ import type { Profile, Punch, Settings } from "@/lib/session";
 import { gpsText, inFix, mapUrl, outFix, type GpsFix } from "@/lib/gps";
 import { formatPhone } from "@/lib/phone";
 import { GUSTO_HEADER, gustoRows } from "@/lib/gusto";
-import { addDays, csvCell, hours, isDate, localInput, todayIn, weekStart, weekTotals, type DayRow } from "@/lib/time";
+import { addDays, csvCell, hours, isDate, localInput, personTotals, todayIn, weekStart, weekTotals, type DayRow } from "@/lib/time";
 
 // Payroll export: one row per punch (with GPS tags), then weekly totals per
 // person. ?format=xlsx gives an Excel workbook with a tab for each,
-// ?format=gusto the file Gusto's "Import hours" takes; otherwise CSV.
+// ?format=gusto the file Gusto's "Import hours" takes (staff only, no
+// volunteers), ?format=volunteers volunteer hours per person; otherwise CSV.
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: isAdmin } = await supabase.rpc("is_admin");
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     if (inLocal.slice(0, 10) < from || inLocal.slice(0, 10) > to) return [];
     const who = byId.get(p.user_id);
     return [{
-      name: who?.full_name ?? "",
+      name: (who?.full_name ?? "") + (who?.role === "volunteer" ? " (volunteer)" : ""),
       phone: formatPhone(who?.phone),
       date: inLocal.slice(0, 10),
       inLocal,
@@ -52,8 +53,9 @@ export async function GET(request: NextRequest) {
       note: p.note,
     }];
   });
+  const volunteers = new Set((people ?? []).filter((p) => p.role === "volunteer").map((p) => p.id));
   const weeks = weekTotals(((days ?? []) as DayRow[]).filter((d) => !user || d.user_id === user),
-    settings!.week_starts_on, Number(settings!.overtime_hours));
+    settings!.week_starts_on, Number(settings!.overtime_hours), volunteers);
   const filename = `timesheet-${from}-to-${to}`;
   const csvResponse = (lines: (string | number)[][], name: string) =>
     new NextResponse(lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n", {
@@ -63,7 +65,19 @@ export async function GET(request: NextRequest) {
       },
     });
 
-  if (sp.get("format") === "gusto") return csvResponse([GUSTO_HEADER, ...gustoRows(weeks)], `gusto-hours-${from}-to-${to}`);
+  if (sp.get("format") === "gusto") {
+    return csvResponse([GUSTO_HEADER, ...gustoRows(weeks.filter((w) => !volunteers.has(w.user_id)))], `gusto-hours-${from}-to-${to}`);
+  }
+  if (sp.get("format") === "volunteers") {
+    const totals = personTotals(weeks.filter((w) => volunteers.has(w.user_id)));
+    const all = totals.reduce((n, v) => n + v.seconds, 0);
+    return csvResponse([
+      [`Volunteer hours ${from} to ${to}`], [],
+      ["Volunteer", "Phone", "Days", "Hours"],
+      ...totals.map((v) => [v.name, formatPhone(byId.get(v.user_id)?.phone), v.days, hours(v.seconds)]),
+      [], ["Total", `${totals.length} volunteers`, totals.reduce((n, v) => n + v.days, 0), hours(all)],
+    ], `volunteer-hours-${from}-to-${to}`);
+  }
 
   if (sp.get("format") === "xlsx") {
     const wb = new ExcelJS.Workbook();

@@ -146,11 +146,14 @@ const needsSync = (r: any) => !r.qbo_synced_at || new Date(r.updated_at) > new D
 async function pending(db: Db, conn: Conn, tz: string) {
   // A day early so shifts that start late in the evening west of UTC aren't missed; filtered by local date below.
   const from = new Date(new Date(`${conn.sync_from}T00:00:00Z`).getTime() - 86400000).toISOString();
-  const [{ data: rows }, { data: gone }] = await Promise.all([
+  const [{ data: rows }, { data: gone }, { data: vols }] = await Promise.all([
     db.from('punches').select('*').not('clock_out', 'is', null).gte('clock_in', from).order('clock_in'),
     db.from('qbo_deleted').select('qbo_id'),
+    db.from('profiles').select('id').eq('role', 'volunteer'),
   ]);
-  const punches = (rows || []).filter(p => localDate(p.clock_in, tz) >= conn.sync_from && needsSync(p) && (p.qbo_id || minutes(p) > 0));
+  // Volunteers are unpaid: never sent to QuickBooks.
+  const volunteers = new Set((vols || []).map(v => v.id));
+  const punches = (rows || []).filter(p => localDate(p.clock_in, tz) >= conn.sync_from && needsSync(p) && (p.qbo_id || minutes(p) > 0) && !volunteers.has(p.user_id));
   return { punches, deleted: (gone || []).map(g => g.qbo_id as string) };
 }
 

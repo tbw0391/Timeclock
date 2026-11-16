@@ -22,7 +22,7 @@ export default async function GustoPage({ searchParams }: Props) {
   const list = await callGusto<{ employees: GustoEmployee[] }>("employees");
   const [status, { data: people }] = await Promise.all([
     callGusto<GustoStatus>("status"),
-    supabase.from("profiles").select("id, full_name, phone, active, gusto_employee_uuid").order("full_name").returns<Person[]>(),
+    supabase.from("profiles").select("id, full_name, phone, active, gusto_employee_uuid").neq("role", "volunteer").order("full_name").returns<Person[]>(),
   ]);
   const s = status.data;
   const employees = list.data?.employees ?? [];

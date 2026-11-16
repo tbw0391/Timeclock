@@ -15,8 +15,10 @@
   - [ ] maybe: text or email a manager when a website message comes in
 
 ## Waiting on Todd
-- [ ] Anthropic API key for website translation: README → Public website → Website translation.
-      Then press "Translate the whole site" and have a native speaker read each language
+- [ ] Staff and volunteer list (names + phone numbers): add on Crew, role Employee or Volunteer.
+      Then check the names match Gusto exactly (Gusto file matches by first and last name)
+- [x] Anthropic API key for website translation (Nov 15; key in Vercel, language picker live)
+- [ ] Press "Translate the whole site" on 🌐 Website; native speaker reads each language
 - [ ] Gusto approval for the live connection (Developer Portal app, `time_sheet:write`); then the
       turn-on steps in README → Gusto, trying Gusto's demo site first
 - [ ] New-family forms for the iPad paperwork (put them in `../forms/`, outside git)

@@ -8,7 +8,7 @@ export type Profile = {
   email: string;
   phone: string | null;
   full_name: string;
-  role: "employee" | "admin";
+  role: "employee" | "volunteer" | "admin";
   active: boolean;
   created_at: string;
 };

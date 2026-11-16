@@ -14,6 +14,10 @@ No server to run.
   signs in. The first code creates the manager account.
 - **Employees** are added by a manager on the Crew page (name + phone), then tap
   Clock In / Clock Out on their phone. They see this week's and last week's hours.
+- **Volunteers** are added the same way with the role set to Volunteer, and clock in
+  the same way (phone or kiosk). They never get overtime, are left out of the Gusto
+  file and the Gusto/QuickBooks syncs, and have their own **Volunteer hours** total on
+  Timesheets (with a download) for reporting volunteer time.
 - **Managers** see who's on the clock, deactivate people, fix or add missed punches
   (a reason is required and every change goes in the change log), view weekly
   totals with overtime, and download a payroll CSV.

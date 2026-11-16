@@ -57,8 +57,8 @@ export type WeekTotal = {
 };
 
 // Roll per-day rows into per-person, per-week totals with overtime past the
-// weekly threshold.
-export function weekTotals(rows: DayRow[], startsOn: number, overtimeHours: number): WeekTotal[] {
+// weekly threshold. People in `unpaid` (volunteers) never get overtime.
+export function weekTotals(rows: DayRow[], startsOn: number, overtimeHours: number, unpaid: Set<string> = new Set()): WeekTotal[] {
   const map = new Map<string, WeekTotal>();
   for (const r of rows) {
     const week = weekStart(r.work_date, startsOn);
@@ -74,7 +74,7 @@ export function weekTotals(rows: DayRow[], startsOn: number, overtimeHours: numb
   }
   const limit = overtimeHours * 3600;
   return [...map.values()]
-    .map((t) => ({ ...t, overtime: Math.max(0, t.seconds - limit) }))
+    .map((t) => ({ ...t, overtime: unpaid.has(t.user_id) ? 0 : Math.max(0, t.seconds - limit) }))
     .sort((a, b) => a.week.localeCompare(b.week) || a.name.localeCompare(b.name));
 }
 
@@ -88,4 +88,18 @@ export function csvCell(v: string | number): string {
 // "Dec 1, 2026": a calendar day (expiry dates, last days) in the reader's language.
 export function dateLabel(date: string, intl = "en-US"): string {
   return new Date(`${date}T00:00:00Z`).toLocaleDateString(intl, { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" });
+}
+
+export type PersonTotal = { user_id: string; name: string; seconds: number; days: number };
+
+// Hours per person over the whole range (e.g. volunteer hours for a report).
+export function personTotals(weeks: WeekTotal[]): PersonTotal[] {
+  const map = new Map<string, PersonTotal>();
+  for (const w of weeks) {
+    const p = map.get(w.user_id) ?? { user_id: w.user_id, name: w.name, seconds: 0, days: 0 };
+    p.seconds += w.seconds;
+    p.days += Object.values(w.days).filter((s) => s > 0).length;
+    map.set(w.user_id, p);
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
 }

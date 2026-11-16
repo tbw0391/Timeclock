@@ -115,10 +115,12 @@ async function pending(db: Db, conn: Conn, s: Settings) {
   const from = new Date(Date.parse(`${week}T00:00:00Z`) - 86400000).toISOString();
   const [{ data: rows }, { data: people }, { data: gone }] = await Promise.all([
     db.from('punches').select('*').not('clock_out', 'is', null).gte('clock_in', from).order('clock_in'),
-    db.from('profiles').select('id, full_name, phone, gusto_employee_uuid, gusto_job_uuid'),
+    db.from('profiles').select('id, full_name, phone, role, gusto_employee_uuid, gusto_job_uuid'),
     db.from('gusto_deleted').select('gusto_id, version'),
   ]);
-  const inWeeks = (rows || []).filter(p => localDate(p.clock_in, s.timezone) >= week);
+  // Volunteers are unpaid: never sent to Gusto.
+  const volunteers = new Set((people || []).filter(w => w.role === 'volunteer').map(w => w.id));
+  const inWeeks = (rows || []).filter(p => localDate(p.clock_in, s.timezone) >= week && !volunteers.has(p.user_id));
   const split = splitShifts(inWeeks.map(p => ({ id: p.id, user: p.user_id, start: p.clock_in, end: p.clock_out })),
     s.timezone, s.week_starts_on, s.overtime_hours);
   const byId = new Map((people || []).map(w => [w.id, w]));
@@ -304,7 +306,7 @@ Deno.serve(async req => {
     if (action === 'employees') {
       const employees = await listEmployees(gusto(db, conn), conn);
       // Match anyone not matched yet whose name is the same as one (and only one) Gusto employee.
-      const { data: people } = await db.from('profiles').select('id, full_name, gusto_employee_uuid');
+      const { data: people } = await db.from('profiles').select('id, full_name, gusto_employee_uuid').neq('role', 'volunteer');
       const taken = new Set((people || []).map(p => p.gusto_employee_uuid).filter(Boolean));
       for (const p of people || []) {
         if (p.gusto_employee_uuid || !p.full_name) continue;

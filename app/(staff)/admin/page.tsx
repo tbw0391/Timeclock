@@ -69,10 +69,14 @@ export default async function AdminPage({ searchParams }: Props) {
 
       <section className="card mb-6 overflow-x-auto">
         <h2 className="mb-1 font-semibold">{t("crew.title")}</h2>
-        <p className="muted mb-3 text-sm">{t("crew.intro")}</p>
+        <p className="muted mb-3 text-sm">{t("crew.intro")} {t("crew.volunteerIntro")}</p>
         <form action={createEmployee} className="mb-4 flex flex-wrap items-center gap-2">
           <input name="full_name" placeholder={t("common.name")} className="input w-44!" required />
           <input name="phone" type="tel" inputMode="tel" placeholder={t("common.phoneNumber")} className="input w-40!" required dir="ltr" />
+          <select name="role" defaultValue="employee" className="input w-32!" aria-label={t("crew.role")}>
+            <option value="employee">{t("crew.employee")}</option>
+            <option value="volunteer">{t("crew.volunteer")}</option>
+          </select>
           <button className="btn">{t("crew.add")}</button>
         </form>
         <table className="tbl">
@@ -87,6 +91,7 @@ export default async function AdminPage({ searchParams }: Props) {
                     <span className="muted min-w-32 flex-1 text-sm" dir="ltr">{formatPhone(p.phone)}</span>
                     <select name="role" defaultValue={p.role} className="input w-32!" aria-label={t("crew.role")}>
                       <option value="employee">{t("crew.employee")}</option>
+                      <option value="volunteer">{t("crew.volunteer")}</option>
                       <option value="admin">{t("crew.manager")}</option>
                     </select>
                     <label className="flex items-center gap-1 text-sm">
