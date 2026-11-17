@@ -16,12 +16,14 @@
 
 ## Waiting on Todd
 - [ ] Staff and volunteer list (names + phone numbers): add on Crew, role Employee or Volunteer.
-      Then check the names match Gusto exactly (Gusto file matches by first and last name)
+      Type staff names as they are in Gusto, for when Gusto comes back
 - [x] Anthropic API key for website translation (Nov 15; key in Vercel, language picker live)
 - [ ] Press "Translate the whole site" on 🌐 Website; native speaker reads each language
+- [ ] New-family forms for the iPad paperwork (put them in `../forms/`, outside git)
+
+## On hold (Nov 16): Gusto
 - [ ] Gusto approval for the live connection (Developer Portal app, `time_sheet:write`); then the
       turn-on steps in README → Gusto, trying Gusto's demo site first
-- [ ] New-family forms for the iPad paperwork (put them in `../forms/`, outside git)
 - [ ] Gusto: try "Download for Gusto" (Timesheets) on one pay period in Gusto → Run payroll → Import hours;
       say if a column or a name doesn't match (columns copied from the estimator app, not yet checked against Gusto)
 
